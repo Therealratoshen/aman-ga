@@ -1,6 +1,6 @@
 # 🛡️ Aman ga? - Payment Verification System
 
-> **Tanya dulu, transfer kemudian.**  
+> **Tanya dulu, transfer kemudian.**
 > *Ask first, transfer later.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -11,6 +11,14 @@
 
 [![Status](https://img.shields.io/badge/status-production--ready-success)](https://github.com/Therealratoshen/aman-ga)
 [![Last Commit](https://img.shields.io/github/last-commit/Therealratoshen/aman-ga)](https://github.com/Therealratoshen/aman-ga/commits/main)
+
+### 🔗 Quick Links
+
+| 📄 **Documentation** | 🎨 **Live Demo** | 💻 **Source Code** |
+|---------------------|------------------|-------------------|
+| [GitHub Pages](https://therealratoshen.github.io/aman-ga/) | _Coming Soon_ | [GitHub Repo](https://github.com/Therealratoshen/aman-ga) |
+
+> **Note:** The GitHub Pages shows project documentation. To see the **beautiful UI with animations**, run the app locally (see [Quick Start](#-quick-start)) or wait for live demo deployment.
 
 ---
 

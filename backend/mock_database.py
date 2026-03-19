@@ -20,7 +20,7 @@ mock_db = {
 admin_user = {
     "id": "admin-001",
     "email": "admin@amanga.id",
-    "password_hash": "$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYzS3MebAJu",  # admin123
+    "password_hash": "$2b$12$pobqHtSaRhN3CKpSSaNlRO4hvihV9.LnDddfDYaKLtSShTwQZ8VRO",  # admin123
     "full_name": "System Administrator",
     "phone": "081234567890",
     "role": "ADMIN",
@@ -32,7 +32,7 @@ admin_user = {
 finance_user = {
     "id": "finance-001",
     "email": "finance@amanga.id",
-    "password_hash": "$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYzS3MebAJu",  # admin123
+    "password_hash": "$2b$12$pobqHtSaRhN3CKpSSaNlRO4hvihV9.LnDddfDYaKLtSShTwQZ8VRO",  # admin123
     "full_name": "Finance Team",
     "phone": "081234567891",
     "role": "FINANCE",

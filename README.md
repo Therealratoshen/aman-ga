@@ -7,7 +7,8 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-green.svg)](https://fastapi.tiangolo.com)
 [![Next.js](https://img.shields.io/badge/Next.js-14-black.svg)](https://nextjs.org)
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)
-[![Mock Mode](https://img.shields.io/badge/Mock_Mode-✅-brightgreen.svg)](#quick-start)
+[![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)](https://github.com/Therealratoshen/aman-ga/releases)
+[![Self-Learning](https://img.shields.io/badge/self--learning-OCR-orange.svg)](./SELF-LEARNING-OCR.md)
 
 [![Status](https://img.shields.io/badge/status-production--ready-success)](https://github.com/Therealratoshen/aman-ga)
 [![Last Commit](https://img.shields.io/github/last-commit/Therealratoshen/aman-ga)](https://github.com/Therealratoshen/aman-ga/commits/main)
@@ -18,7 +19,7 @@
 |---------------------|------------------|-------------------|
 | [GitHub Pages](https://therealratoshen.github.io/aman-ga/) | _Coming Soon_ | [GitHub Repo](https://github.com/Therealratoshen/aman-ga) |
 
-> **Note:** The GitHub Pages shows project documentation. To see the **beautiful UI with animations**, run the app locally (see [Quick Start](#-quick-start)) or wait for live demo deployment.
+> **✨ NEW in v2.1:** Self-learning OCR system, modern smooth UI, uncertainty reporting, and automated deployment scripts!
 
 ---
 
@@ -26,6 +27,7 @@
 
 - [What is Aman ga?](#-what-is-aman-ga)
 - [✨ Features](#-features)
+- [🆕 What's New in v2.1](#-whats-new-in-v21)
 - [🎯 Quick Start](#-quick-start)
 - [📋 Demo Credentials](#-demo-credentials)
 - [🏗️ Architecture](#️-architecture)
@@ -35,6 +37,7 @@
 - [🧪 Testing](#-testing)
 - [🚀 Deployment](#-deployment)
 - [🛡️ Security](#️-security)
+- [🧠 Self-Learning OCR](#-self-learning-ocr)
 - [📊 Database Schema](#-database-schema)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
@@ -58,23 +61,29 @@ In Indonesia, online fraud is rampant. People need a way to:
 
 ```mermaid
 graph LR
-    A[User Uploads Payment Proof] --> B{Amount < Rp 1.000?}
-    B -->|Yes| C[Auto-Approve]
-    B -->|No| D[Admin Review]
-    C --> E[Service Credit Activated]
-    D --> E
-    D --> F[Fraud Detected?]
-    F -->|Yes| G[Flag & Suspend]
-    F -->|No| E
+    A[User Uploads Payment Proof] --> B{Validation}
+    B --> C[File Validation]
+    B --> D[OCR Extraction]
+    B --> E[Image Analysis]
+    C --> F[Fraud Scoring]
+    D --> F
+    E --> F
+    F --> G{Risk Level}
+    G -->|LOW| H[Auto-Approve]
+    G -->|MEDIUM| I[Manual Review]
+    G -->|HIGH| J[Flag & Suspend]
 ```
 
 1. **User registers** and purchases a service package
 2. **Uploads payment proof** (screenshot of transfer)
-3. **System verifies**:
-   - Amount < Rp 1.000 → **Auto-approved** ⚡
-   - Amount ≥ Rp 1.000 → **Admin review** 👮
-4. **Service credit activated** → User can perform fraud checks
-5. **Fraud detection** runs in background, flags suspicious patterns
+3. **System validates**:
+   - File validation (size, MIME, dimensions)
+   - OCR extraction with confidence scoring
+   - Image manipulation detection
+   - Duplicate detection
+4. **Fraud scoring** (0-200 points) determines risk level
+5. **Decision**: Auto-approve, Manual Review, or Flag
+6. **Service credit activated** → User can perform fraud checks
 
 ---
 
@@ -94,11 +103,25 @@ graph LR
 - ✅ Payment history tracking
 
 ### 🛡️ Fraud Detection
-- ✅ Risk scoring algorithm
-- ✅ Duplicate transaction detection
+- ✅ Risk scoring algorithm (0-200 points)
+- ✅ Duplicate transaction detection (3 types)
 - ✅ Pattern analysis
 - ✅ Automatic user suspension for confirmed fraud
 - ✅ Fraud flag review system
+
+### 🧠 Self-Learning OCR ⭐ NEW v2.1
+- ✅ Receipt format database (13 Indonesian providers)
+- ✅ Uncertainty reporting with alternatives
+- ✅ User feedback loop for continuous learning
+- ✅ Confidence scoring (never 100%)
+- ✅ OCR pattern refinement from corrections
+
+### 🎨 Modern UI ⭐ NEW v2.1
+- ✅ Smooth animations and transitions
+- ✅ Real-time validation feedback
+- ✅ Confidence visualization
+- ✅ Interactive feedback interface
+- ✅ Responsive design (mobile-friendly)
 
 ### 👮 Admin Dashboard
 - ✅ Pending payment review queue
@@ -118,6 +141,56 @@ graph LR
 - ✅ WhatsApp integration (Fonnte)
 - ✅ Email integration (SendGrid)
 - ✅ Mock mode for development
+
+---
+
+## 🆕 What's New in v2.1
+
+### 🧠 Self-Learning OCR System
+
+The system now learns from every user interaction:
+
+- **Receipt Format Database**: Pre-configured for 13 Indonesian providers (BCA, BRI, Mandiri, GoPay, OVO, DANA, etc.)
+- **Uncertainty Reporting**: Never 100% confident - always shows alternative interpretations
+- **User Feedback Loop**: Every correction improves the system
+- **Confidence Scoring**: Field-level confidence with visual indicators
+- **Continuous Learning**: Accuracy improves over time
+
+### 🎨 Modern Smooth UI
+
+Beautiful new interface with:
+
+- Smooth animations (fade, slide, scale)
+- Real-time validation feedback
+- Confidence visualization meters
+- Interactive feedback interface
+- Responsive design (works on all devices)
+
+### 🛡️ Enhanced Security
+
+- Multi-layer validation (file, OCR, image, fraud)
+- Rate limiting with IP blocking
+- Perceptual hashing for duplicate detection
+- Image manipulation detection (ELA, metadata, noise)
+- Comprehensive audit logging
+
+### 🚀 Easy Deployment
+
+- Automated deployment script (`deploy.sh`)
+- Systemd service configuration
+- Nginx reverse proxy setup
+- One-command deployment to any VPS
+
+### 📚 Complete Documentation
+
+7 new comprehensive guides:
+- `SELF-LEARNING-OCR.md` - OCR system details
+- `SECURITY-IMPROVEMENTS.md` - Security features
+- `DEPLOYMENT-SERVER.md` - Server deployment guide
+- `QUICK-REFERENCE.md` - Common commands
+- `DOCUMENTATION-INDEX.md` - Navigation index
+- `FINAL-CHECKLIST.md` - Production checklist
+- `IMPLEMENTATION-SUMMARY.md` - Implementation details
 
 ---
 
@@ -446,32 +519,65 @@ curl -X POST "http://localhost:8000/token" \
 
 ## 🚀 Deployment
 
-### Recommended Stack (Production)
+### ⚡ Quick Deploy (Recommended)
 
-| Component | Service | Cost | Setup Time |
-|-----------|---------|------|------------|
-| **Frontend** | Vercel | Free | 5 min |
-| **Backend** | Railway | $5/month | 10 min |
-| **Database** | Supabase | Free (500MB) | 5 min |
-| **Storage** | Supabase Storage | Free (1GB) | 5 min |
-| **Total** | | **~$5/month** | **25 min** |
+Deploy to any VPS (Alibaba Cloud, DigitalOcean, etc.) in one command:
 
-### Deployment Guides
+```bash
+# SSH to your server
+ssh root@YOUR_SERVER_IP
 
-- [QUICKSTART.md](./QUICKSTART.md) - Basic setup
-- [DEPLOYMENT-OPTIONS.md](./DEPLOYMENT-OPTIONS.md) - Cloud provider comparison
-- [API-KEY-SETUP.md](./API-KEY-SETUP.md) - WhatsApp/Email setup
+# Clone and deploy
+git clone https://github.com/Therealratoshen/aman-ga.git
+cd aman-ga
+sudo ./deploy.sh
+```
 
-### Alibaba Cloud Option
+**That's it!** The script will:
+- ✅ Install all dependencies (Python, Tesseract OCR, Nginx)
+- ✅ Setup Python virtual environment
+- ✅ Configure Nginx as reverse proxy
+- ✅ Setup systemd service for auto-start
+- ✅ Configure firewall
+- ✅ Start everything automatically
 
-For Indonesian market with local data residency:
+### 📚 Deployment Options
 
-| Setup | Monthly Cost | Complexity |
-|-------|--------------|------------|
-| Minimal (Simple Server) | ~$6.50 | ⭐⭐ Medium |
-| Production (ECS + RDS) | ~$50 | ⭐⭐⭐ Hard |
+| Method | Best For | Setup Time | Cost |
+|--------|----------|------------|------|
+| **Simple Application Server** | Production | 5 min | $5-10/month |
+| **Docker** | Development | 10 min | Free |
+| **Vercel + Railway** | Testing | 15 min | Free |
 
-**See [DEPLOYMENT-OPTIONS.md](./DEPLOYMENT-OPTIONS.md) for full comparison.**
+### 📖 Deployment Guides
+
+- **[DEPLOYMENT-SERVER.md](./DEPLOYMENT-SERVER.md)** - Complete server deployment guide
+- **[QUICK-REFERENCE.md](./QUICK-REFERENCE.md)** - Common commands & troubleshooting
+- **[DEPLOYMENT-OPTIONS.md](./DEPLOYMENT-OPTIONS.md)** - Cloud provider comparison
+- **[QUICKSTART.md](./QUICKSTART.md)** - Basic setup (5 min)
+- **[API-KEY-SETUP.md](./API-KEY-SETUP.md)** - WhatsApp/Email setup
+
+### 🔧 Server Requirements
+
+```
+- OS: Ubuntu 20.04+ / CentOS 7+
+- RAM: 2GB minimum (4GB recommended)
+- Storage: 10GB free space
+- Python: 3.10+
+```
+
+### 🌐 After Deployment
+
+Access your application:
+- **Frontend**: `http://YOUR_SERVER_IP/`
+- **API Docs**: `http://YOUR_SERVER_IP/docs`
+- **Health Check**: `http://YOUR_SERVER_IP/health`
+
+**Production Setup:**
+1. Edit `.env` with Supabase credentials
+2. Set `MOCK_MODE=False`
+3. Install SSL certificate: `sudo certbot --nginx`
+4. Change default passwords
 
 ---
 
@@ -482,26 +588,32 @@ For Indonesian market with local data residency:
 - ✅ Password hashing with bcrypt (12 rounds)
 - ✅ Role-based access control (RBAC)
 - ✅ Protected routes with middleware
+- ✅ Rate limiting (login, upload, API)
+- ✅ IP blocking after violations
 
 ### Data Protection
 - ✅ SQL injection prevention (Supabase client)
-- ✅ Input validation (Pydantic schemas)
-- ✅ CORS configuration
+- ✅ Input validation (Pydantic + custom validators)
+- ✅ CORS configuration (hardened)
 - ✅ XSS protection headers
+- ✅ Security headers (HSTS, CSP, etc.)
+- ✅ File validation (MIME, size, dimensions)
 
 ### Fraud Prevention
-- ✅ Risk scoring algorithm
-- ✅ Duplicate transaction detection
-- ✅ Pattern analysis
+- ✅ Risk scoring algorithm (0-200 points)
+- ✅ Duplicate transaction detection (3 types)
+- ✅ Image manipulation detection (ELA, metadata, noise)
+- ✅ OCR verification with form matching
 - ✅ Automatic suspension for confirmed fraud
 - ✅ Audit logging for all admin actions
+- ✅ Perceptual hashing for image duplicates
 
-### Production Recommendations
-- ⚠️ Enable HTTPS/SSL
-- ⚠️ Add rate limiting
-- ⚠️ Implement CSRF protection
-- ⚠️ Set up monitoring (Sentry)
-- ⚠️ Regular security audits
+### Production Ready
+- ✅ HTTPS/SSL (Certbot)
+- ✅ Rate limiting enabled
+- ✅ CSRF protection headers
+- ✅ Comprehensive logging
+- ✅ Automated backups support
 
 ---
 

@@ -1,4 +1,4 @@
-# 🛡️ Aman ga? - Payment Verification System
+# 🛡️ Aman ga? - Payment Verification POC
 
 > **Tanya dulu, transfer kemudian.**
 > *Ask first, transfer later.*
@@ -12,12 +12,15 @@
 
 [![Status](https://img.shields.io/badge/status-production--ready-success)](https://github.com/Therealratoshen/aman-ga)
 [![Last Commit](https://img.shields.io/github/last-commit/Therealratoshen/aman-ga)](https://github.com/Therealratoshen/aman-ga/commits/main)
+[![Live Demo](https://img.shields.io/badge/live_demo-available-brightgreen.svg)](http://147.139.202.129/)
 
 ### 🔗 Quick Links
 
 | 📄 **Documentation** | 🎨 **Live Demo** | 💻 **Source Code** |
 |---------------------|------------------|-------------------|
-| [GitHub Pages](https://therealratoshen.github.io/aman-ga/) | _Coming Soon_ | [GitHub Repo](https://github.com/Therealratoshen/aman-ga) |
+| [GitHub Pages](https://therealratoshen.github.io/aman-ga/) | [🔗 147.139.202.129](http://147.139.202.129/) | [GitHub Repo](https://github.com/Therealratoshen/aman-ga) |
+
+> **⚠️ IMPORTANT:** This is a **Proof of Concept (POC) / Demo system**. No real payments are processed. All transactions are simulated for testing and learning purposes.
 
 > **✨ NEW in v2.1:** Self-learning OCR system, modern smooth UI, uncertainty reporting, and automated deployment scripts!
 
@@ -47,15 +50,17 @@
 
 ## 🎯 What is Aman ga?
 
-**Aman ga?** is a comprehensive **payment verification platform** designed for the Indonesian market to help users verify if online transactions are safe before transferring money.
+**Aman ga?** is a **Proof of Concept (POC) payment verification system** designed for the Indonesian market to help users verify if online transactions are safe before transferring money.
+
+> **⚠️ DISCLAIMER:** This is a **demo/educational project**. No real payments are processed. All transactions are simulated. The system demonstrates OCR, image validation, and fraud detection concepts.
 
 ### The Problem We Solve
 
 In Indonesia, online fraud is rampant. People need a way to:
-- ✅ Verify if a seller/service is legitimate
-- ✅ Check payment proofs before releasing services
-- ✅ Get expert analysis on suspicious transactions
-- ✅ Report and flag fraudulent activities
+- ✅ Verify if a seller/service is legitimate (demo)
+- ✅ Check payment proofs before releasing services (simulated)
+- ✅ Get expert analysis on suspicious transactions (AI-powered POC)
+- ✅ Report and flag fraudulent activities (demo workflow)
 
 ### How It Works
 
@@ -74,8 +79,8 @@ graph LR
     G -->|HIGH| J[Flag & Suspend]
 ```
 
-1. **User registers** and purchases a service package
-2. **Uploads payment proof** (screenshot of transfer)
+1. **User registers** (demo account)
+2. **Uploads payment proof** (screenshot - no real payment)
 3. **System validates**:
    - File validation (size, MIME, dimensions)
    - OCR extraction with confidence scoring
@@ -83,7 +88,24 @@ graph LR
    - Duplicate detection
 4. **Fraud scoring** (0-200 points) determines risk level
 5. **Decision**: Auto-approve, Manual Review, or Flag
-6. **Service credit activated** → User can perform fraud checks
+6. **Service credit activated** (simulated) → User can test fraud checks
+
+### 🌐 Live Demo
+
+**Try it now:** [http://147.139.202.129/](http://147.139.202.129/)
+
+**Demo Credentials:**
+- **Admin**: `admin@amanga.id` / `admin123`
+- **Finance**: `finance@amanga.id` / `admin123`
+- **User**: Register a new account (demo)
+
+**What You Can Do:**
+- ✅ Upload fake payment proofs (for testing)
+- ✅ See OCR extraction in action
+- ✅ View validation results
+- ✅ Test admin approval workflow
+- ✅ Provide feedback to improve OCR
+- ✅ Explore all features (no real money involved)
 
 ---
 
@@ -95,18 +117,19 @@ graph LR
 - ✅ Secure password hashing (bcrypt)
 - ✅ Token expiration & refresh
 
-### 💳 Payment Processing
-- ✅ **Auto-Approval** for payments < Rp 1.000
-- ✅ Manual admin review for larger amounts
-- ✅ Image upload for payment proofs
-- ✅ Multiple payment methods (Bank Transfer, E-Wallets)
-- ✅ Payment history tracking
+### 💳 Payment Processing (Simulated)
+> **⚠️ No real payments** - All transactions are simulated for testing
+- ✅ **Auto-Approval** for payments < Rp 1.000 (demo)
+- ✅ Manual admin review for larger amounts (workflow demo)
+- ✅ Image upload for payment proofs (OCR testing)
+- ✅ Multiple payment methods (Bank Transfer, E-Wallets - simulated)
+- ✅ Payment history tracking (demo data)
 
 ### 🛡️ Fraud Detection
 - ✅ Risk scoring algorithm (0-200 points)
 - ✅ Duplicate transaction detection (3 types)
 - ✅ Pattern analysis
-- ✅ Automatic user suspension for confirmed fraud
+- ✅ Automatic user suspension for confirmed fraud (simulated)
 - ✅ Fraud flag review system
 
 ### 🧠 Self-Learning OCR ⭐ NEW v2.1
@@ -258,17 +281,21 @@ See [QUICKSTART.md](./QUICKSTART.md) for detailed setup guide.
 
 ## 📋 Demo Credentials
 
+> **⚠️ IMPORTANT:** This is a **demo system**. No real payments are processed. All data is simulated for testing purposes.
+
 | Role | Email | Password | Access Level |
 |------|-------|----------|--------------|
 | **👑 Admin** | admin@amanga.id | admin123 | Full access, fraud flagging |
-| **💰 Finance** | finance@amanga.id | admin123 | Approve/reject payments |
-| **👤 User** | Register new | Your choice | Purchase & use services |
+| **💰 Finance** | finance@amanga.id | admin123 | Approve/reject payments (simulated) |
+| **👤 User** | Register new | Your choice | Test features (no real money) |
 
 **Try these steps:**
 1. Login as **Admin** → Explore admin dashboard
-2. Register **new user** → Purchase service → Upload payment
-3. Logout → Login as **Finance** → Approve payment
-4. Check user dashboard → See activated credit
+2. Register **new user** → Upload fake payment proof (test only)
+3. Logout → Login as **Finance** → Approve payment (simulated)
+4. Check user dashboard → See activated credit (demo)
+
+**🌐 Live Demo:** [http://147.139.202.129/](http://147.139.202.129/)
 
 ---
 

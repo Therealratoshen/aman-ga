@@ -1,18 +1,24 @@
 from database import supabase
 from datetime import datetime
 import random
+from typing import Dict, List, Optional
 
 class PaymentService:
     AUTO_APPROVE_THRESHOLD = 1000  # Rp 1.000
     RANDOM_AUDIT_RATE = 0.10  # 10%
     
+    # Enhanced auto-approval requirements for v2.0
+    MAX_OCR_MISMATCHES = 0  # No mismatches allowed for auto-approve
+    MAX_IMAGE_RISK_LEVEL = "LOW"  # Only LOW risk for auto-approve
+    MAX_FRAUD_RISK_SCORE = 20  # Maximum risk score for auto-approve
+
     def create_payment_proof(self, user_id: str, payment_data: dict):
-        """Create payment proof record"""
-        
-        # Determine if auto-approve
+        """Create payment proof record with enhanced validation data"""
+
+        # Determine if auto-approve with enhanced checks
         auto_approve = self.should_auto_approve(user_id, payment_data)
         status = "AUTO_APPROVED" if auto_approve else "PENDING"
-        
+
         payment_proof = {
             "user_id": user_id,
             "service_type": payment_data["service_type"],
@@ -22,38 +28,65 @@ class PaymentService:
             "transaction_id": payment_data["transaction_id"],
             "transaction_date": payment_data["transaction_date"],
             "proof_image_url": payment_data["proof_image_url"],
+            "proof_image_hash": payment_data.get("proof_image_hash"),
+            "ocr_extracted_amount": payment_data.get("ocr_extracted_amount"),
+            "ocr_extracted_transaction_id": payment_data.get("ocr_extracted_transaction_id"),
+            "ocr_confidence_score": payment_data.get("ocr_confidence_score"),
+            "ocr_matches_form": payment_data.get("ocr_matches_form", False),
+            "image_manipulation_detected": payment_data.get("image_manipulation_detected", False),
+            "image_risk_level": payment_data.get("image_risk_level", "UNKNOWN"),
+            "fraud_risk_score": payment_data.get("fraud_risk_score", 0),
+            "fraud_risk_factors": payment_data.get("fraud_risk_factors", []),
             "status": status
         }
-        
+
         result = supabase.table("payment_proofs").insert(payment_proof).execute()
-        
+
         # If auto-approved, credit service immediately
         if auto_approve:
             self.credit_service(user_id, payment_data["service_type"], result.data[0]["id"])
-        
+
         return result.data[0]
-    
+
     def should_auto_approve(self, user_id: str, payment_data: dict) -> bool:
-        """Determine if payment can be auto-approved"""
-        
+        """Determine if payment can be auto-approved with enhanced validation"""
+
         # Check amount threshold
         if payment_data["amount"] > self.AUTO_APPROVE_THRESHOLD:
             return False
-        
+
         # Check service type
         if payment_data["service_type"] != "CEK_DASAR":
             return False
-        
+
         # Check user fraud history
         fraud_history = supabase.table("fraud_flags").select("*").eq("user_id", user_id).eq("status", "CONFIRMED").execute()
-        
+
         if len(fraud_history.data) > 0:
             return False
+
+        # Enhanced validation checks for v2.0
         
+        # Check OCR matches form
+        if payment_data.get("ocr_matches_form") is False:
+            return False
+        
+        # Check image manipulation
+        if payment_data.get("image_manipulation_detected", False):
+            return False
+        
+        # Check image risk level
+        if payment_data.get("image_risk_level") not in ["LOW", None]:
+            return False
+        
+        # Check fraud risk score
+        if payment_data.get("fraud_risk_score", 0) > self.MAX_FRAUD_RISK_SCORE:
+            return False
+
         # Random audit (10%)
         if random.random() < self.RANDOM_AUDIT_RATE:
             return False
-        
+
         return True
     
     def credit_service(self, user_id: str, service_type: str, payment_proof_id: str):

@@ -1,16 +1,87 @@
 from database import supabase
 from datetime import datetime
 import re
+from typing import Dict, List, Optional, Tuple
 
 class FraudService:
     """Fraud detection and prevention service"""
     
+    # Duplicate detection thresholds
+    IMAGE_HASH_SIMILARITY_THRESHOLD = 0.95  # 95% similar = duplicate
+    AMOUNT_MATCH_TOLERANCE = 0  # Exact match required
+    
     def check_duplicate_proof(self, user_id: str, transaction_id: str) -> bool:
         """Check if transaction ID already exists"""
-        
+
         result = supabase.table("payment_proofs").select("*").eq("transaction_id", transaction_id).execute()
-        
+
         return len(result.data) > 0
+    
+    def check_duplicate_image(self, image_hash: str, user_id: str = None) -> Tuple[bool, Optional[str]]:
+        """
+        Check if image hash matches existing payment proof
+        Returns (is_duplicate, existing_payment_id)
+        """
+        try:
+            from validators import PaymentValidator
+            validator = PaymentValidator()
+            
+            # Get all payment proofs with image hashes
+            result = supabase.table("payment_proofs").select("id, user_id, proof_image_hash, created_at").execute()
+            
+            if not result.data:
+                return False, None
+            
+            for payment in result.data:
+                existing_hash = payment.get("proof_image_hash")
+                if not existing_hash:
+                    continue
+                
+                # Calculate similarity
+                similarity = validator.calculate_image_similarity(image_hash, existing_hash)
+                
+                if similarity >= self.IMAGE_HASH_SIMILARITY_THRESHOLD:
+                    # Found duplicate
+                    return True, payment["id"]
+            
+            return False, None
+            
+        except Exception as e:
+            print(f"Error checking duplicate image: {e}")
+            return False, None
+    
+    def check_duplicate_transaction(self, user_id: str, amount: int, transaction_date: str, bank_name: str) -> Tuple[bool, Optional[str]]:
+        """
+        Check for duplicate transaction with same amount, date, and bank
+        Returns (is_duplicate, existing_payment_id)
+        """
+        try:
+            # Get user's recent payments
+            result = supabase.table("payment_proofs").select("*").eq("user_id", user_id).execute()
+            
+            if not result.data:
+                return False, None
+            
+            for payment in result.data:
+                # Check if same amount, date, and bank
+                if (payment.get("amount") == amount and 
+                    payment.get("bank_name") == bank_name):
+                    
+                    # Check if same date (compare just the date part)
+                    try:
+                        existing_date = payment.get("transaction_date", "")[:10]
+                        new_date = transaction_date[:10]
+                        
+                        if existing_date == new_date:
+                            return True, payment["id"]
+                    except:
+                        continue
+            
+            return False, None
+            
+        except Exception as e:
+            print(f"Error checking duplicate transaction: {e}")
+            return False, None
     
     def check_suspicious_pattern(self, user_id: str) -> dict:
         """Check for suspicious payment patterns"""
@@ -57,24 +128,52 @@ class FraudService:
             "flags": []
         }
     
-    def calculate_risk_score(self, user_id: str, payment_data: dict) -> dict:
+    def calculate_risk_score(
+        self, 
+        user_id: str, 
+        payment_data: dict,
+        image_analysis: dict = None,
+        ocr_result: dict = None
+    ) -> dict:
         """Calculate fraud risk score for a payment"""
-        
+
         risk_score = 0
         risk_factors = []
-        
+
         # Check fraud history
         fraud_history = supabase.table("fraud_flags").select("*").eq("user_id", user_id).eq("status", "CONFIRMED").execute()
-        
+
         if len(fraud_history.data) > 0:
             risk_score += 50
             risk_factors.append("Previous fraud history")
-        
-        # Check for duplicate transaction
+
+        # Check for duplicate transaction ID
         if self.check_duplicate_proof(user_id, payment_data.get("transaction_id", "")):
             risk_score += 40
             risk_factors.append("Duplicate transaction ID")
         
+        # Check for duplicate image (if hash provided)
+        if payment_data.get("proof_image_hash"):
+            is_duplicate, existing_id = self.check_duplicate_image(
+                payment_data["proof_image_hash"], 
+                user_id
+            )
+            if is_duplicate:
+                risk_score += 60
+                risk_factors.append(f"Duplicate image detected (matches payment {existing_id[:8]})")
+        
+        # Check for duplicate transaction pattern
+        if payment_data.get("amount") and payment_data.get("transaction_date") and payment_data.get("bank_name"):
+            is_duplicate, existing_id = self.check_duplicate_transaction(
+                user_id,
+                payment_data["amount"],
+                payment_data["transaction_date"],
+                payment_data["bank_name"]
+            )
+            if is_duplicate:
+                risk_score += 35
+                risk_factors.append(f"Duplicate transaction pattern (same amount, date, bank)")
+
         # Check suspicious patterns
         patterns = self.check_suspicious_pattern(user_id)
         if patterns["rapid_submissions"]:
@@ -83,12 +182,40 @@ class FraudService:
         if patterns["multiple_rejections"]:
             risk_score += 25
             risk_factors.append("Multiple previous rejections")
-        
+
         # Check amount threshold
         if payment_data.get("amount", 0) > 100000:
             risk_score += 15
             risk_factors.append("High amount transaction")
         
+        # Check image analysis results
+        if image_analysis:
+            if image_analysis.get("is_manipulated"):
+                risk_score += 70
+                risk_factors.append("Image manipulation detected")
+            
+            if image_analysis.get("risk_level") == "HIGH":
+                risk_score += 30
+                risk_factors.append("High risk image indicators")
+            elif image_analysis.get("risk_level") == "CRITICAL":
+                risk_score += 50
+                risk_factors.append("Critical risk image indicators")
+            
+            if image_analysis.get("manipulation_indicators"):
+                for indicator in image_analysis["manipulation_indicators"]:
+                    risk_factors.append(f"Image: {indicator}")
+        
+        # Check OCR mismatches
+        if ocr_result and ocr_result.get("mismatches"):
+            mismatch_count = len(ocr_result["mismatches"])
+            risk_score += min(50, mismatch_count * 25)  # 25 points per mismatch, max 50
+            risk_factors.append(f"OCR detected {mismatch_count} mismatch(es) between form and image")
+        
+        # Check OCR confidence
+        if ocr_result and ocr_result.get("confidence_score", 1.0) < 0.3:
+            risk_score += 15
+            risk_factors.append("Low OCR confidence - image may be unclear or manipulated")
+
         # Determine risk level
         if risk_score >= 70:
             risk_level = "CRITICAL"
@@ -98,7 +225,7 @@ class FraudService:
             risk_level = "MEDIUM"
         else:
             risk_level = "LOW"
-        
+
         return {
             "risk_score": risk_score,
             "risk_level": risk_level,

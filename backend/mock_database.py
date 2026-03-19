@@ -4,7 +4,7 @@ This allows you to test the full application without any external dependencies.
 """
 
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 
 # In-memory storage (resets on restart)
@@ -56,6 +56,20 @@ class MockTable:
             record["created_at"] = datetime.now().isoformat()
         if "updated_at" not in record:
             record["updated_at"] = datetime.now().isoformat()
+        
+        # Add mock validation fields for payment_proofs
+        if self.table_name == "payment_proofs":
+            # Add mock OCR and image analysis fields if not present
+            record.setdefault("proof_image_hash", f"hash_{len(self.data)}")
+            record.setdefault("ocr_extracted_amount", record.get("amount"))
+            record.setdefault("ocr_confidence_score", 0.85)
+            record.setdefault("ocr_matches_form", True)
+            record.setdefault("image_manipulation_detected", False)
+            record.setdefault("image_risk_level", "LOW")
+            record.setdefault("image_quality_score", 0.9)
+            record.setdefault("fraud_risk_score", 10)
+            record.setdefault("fraud_risk_factors", [])
+        
         self.data.append(record)
         return MockResponse([record])
     

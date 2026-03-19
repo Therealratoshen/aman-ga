@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aman ga? — Verifikasi Bukti Pembayaran dengan AI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+:root{
+  --green:#1D9E75;
+  --green-dark:#0D8761;
+  --green-light:#E1F5EE;
+  --red:#E24B4A;
+  --red-light:#FCEBEB;
+  --orange:#EF9F27;
+  --orange-light:#FAEEDA;
+  --blue:#3B82F6;
+  --blue-light:#DBEAFE;
+  --purple:#8B5CF6;
+  --purple-light:#EDE9FE;
+  --bg:#F7F8F5;
+  --card:#FFFFFF;
+  --text:#1a1a1a;
+  --text-muted:#6b7280;
+  --border:#e5e7eb;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg:0 10px 40px rgba(0,0,0,0.12);
+  --shadow-xl:0 20px 60px rgba(0,0,0,0.16);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:linear-gradient(135deg,#f5f7fa 0%,#e8f4f0 50%,#f5f7fa 100%);color:var(--text);min-height:100vh;line-height:1.6}
+
+/* Animations */
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{transform:translateX(-20px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes scaleIn{from{transform:scale(0.95);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+/* Navigation */
+nav{background:var(--card);border-bottom:1px solid var(--border);padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow-sm);backdrop-filter:blur(10px)}
+.logo{display:flex;align-items:center;gap:12px;font-weight:800;font-size:20px;color:var(--green-dark);text-decoration:none}
+.logo-icon{background:linear-gradient(135deg,var(--green),var(--green-dark));color:white;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 12px rgba(29,158,117,0.3);transition:transform 0.2s}
+.logo:hover .logo-icon{transform:rotate(-10deg) scale(1.05)}
+.nav-actions{display:flex;align-items:center;gap:12px}
+.btn-nav{background:none;border:1px solid var(--border);padding:8px 16px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;color:var(--text-muted);transition:all 0.2s;background:var(--bg)}
+.btn-nav:hover{background:var(--green-light);color:var(--green-dark);border-color:var(--green)}
+
+/* Login Page */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn 0.5s ease}
+.login-card{background:var(--card);border-radius:24px;padding:48px 40px;width:100%;max-width:440px;box-shadow:var(--shadow-xl);border:1px solid var(--border);animation:scaleIn 0.5s ease}
+.login-header{text-align:center;margin-bottom:32px}
+.login-icon{background:linear-gradient(135deg,var(--green),var(--green-dark));color:white;width:72px;height:72px;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 20px;box-shadow:0 8px 24px rgba(29,158,117,0.3)}
+.login-header h1{font-size:28px;font-weight:800;color:var(--green-dark);margin-bottom:8px}
+.login-header p{font-size:14px;color:var(--text-muted)}
+.form-group{margin-bottom:18px}
+.form-group label{display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text)}
+.form-group input,.form-group select{width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;font-family:inherit;outline:none;transition:all 0.2s;background:var(--bg)}
+.form-group input:focus,.form-group select:focus{border-color:var(--green);box-shadow:0 0 0 4px var(--green-light);background:var(--card)}
+.form-group small{display:block;font-size:12px;color:var(--text-muted);margin-top:6px}
+.btn-primary{width:100%;background:linear-gradient(135deg,var(--green),var(--green-dark));color:white;border:none;padding:15px;border-radius:12px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;transition:all 0.3s;box-shadow:0 4px 14px rgba(29,158,117,0.3)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(29,158,117,0.4)}
+.btn-primary:disabled{background:var(--border);cursor:not-allowed;transform:none;box-shadow:none}
+.error-message{background:var(--red-light);color:var(--red);border-radius:12px;padding:12px 16px;font-size:13px;margin-bottom:18px;display:none;border:1px solid rgba(226,75,74,0.2);animation:shake 0.5s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.hint-box{margin-top:20px;background:var(--green-light);border-radius:12px;padding:14px 16px;font-size:13px;color:var(--green-dark);line-height:1.6;border:1px solid rgba(29,158,117,0.2)}
+
+/* Main App */
+#app-screen{display:none}
+.app-layout{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 64px)}
+.sidebar{background:var(--card);border-right:1px solid var(--border);padding:20px 16px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;cursor:pointer;font-size:14px;font-weight:600;color:var(--text-muted);margin-bottom:6px;transition:all 0.2s;text-decoration:none}
+.nav-item:hover{background:var(--bg);color:var(--text)}
+.nav-item.active{background:var(--green-light);color:var(--green-dark)}
+.nav-item-icon{font-size:18px;width:24px;text-align:center}
+.main-content{padding:32px;max-width:1100px}
+.page-header{margin-bottom:28px}
+.page-title{font-size:26px;font-weight:800;margin-bottom:6px;color:var(--text)}
+.page-subtitle{font-size:14px;color:var(--text-muted)}
+
+/* Stats Cards */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px;animation:fadeIn 0.5s ease}
+.stat-card{background:var(--card);border-radius:16px;padding:24px;border:1px solid var(--border);box-shadow:var(--shadow-sm);transition:all 0.3s}
+.stat-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.stat-label{font-size:12px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.stat-value{font-size:32px;font-weight:800}
+.stat-value.green{color:var(--green)}
+.stat-value.red{color:var(--red)}
+.stat-value.orange{color:var(--orange)}
+
+/* Upload Card */
+.upload-card{background:var(--card);border-radius:20px;border:1px solid var(--border);padding:32px;box-shadow:var(--shadow-md);animation:fadeIn 0.5s ease}
+.upload-card h3{font-size:18px;font-weight:700;margin-bottom:24px;display:flex;align-items:center;gap:10px}
+.dropzone{border:2px dashed var(--border);border-radius:16px;padding:48px 24px;text-align:center;cursor:pointer;transition:all 0.3s;background:var(--bg);position:relative;overflow:hidden}
+.dropzone:hover,.dropzone.dragover{border-color:var(--green);background:var(--green-light)}
+.dropzone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.dropzone-icon{font-size:56px;margin-bottom:16px;transition:transform 0.3s}
+.dropzone:hover .dropzone-icon{transform:scale(1.1)}
+.dropzone-text{font-size:16px;font-weight:700;margin-bottom:6px}
+.dropzone-hint{font-size:13px;color:var(--text-muted)}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:24px}
+.form-full{grid-column:1/-1}
+.btn-submit{margin-top:24px;background:linear-gradient(135deg,var(--green),var(--green-dark));color:white;border:none;padding:16px 32px;border-radius:12px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;transition:all 0.3s;box-shadow:0 4px 14px rgba(29,158,117,0.3);display:flex;align-items:center;justify-content:center;gap:10px}
+.btn-submit:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(29,158,117,0.4)}
+.btn-submit:disabled{background:var(--border);cursor:not-allowed;transform:none}
+
+/* Results */
+.result-card{border-radius:16px;padding:24px;margin-top:24px;display:none;animation:slideIn 0.5s ease}
+.result-card.approved{background:var(--green-light);border:2px solid var(--green)}
+.result-card.pending{background:var(--orange-light);border:2px solid var(--orange)}
+.result-card.rejected{background:var(--red-light);border:2px solid var(--red)}
+.result-header{display:flex;align-items:center;gap:16px;margin-bottom:20px}
+.result-icon{font-size:40px}
+.result-title{font-size:20px;font-weight:700}
+.result-message{font-size:14px;color:var(--text-muted);margin-top:4px}
+.validation-section{background:var(--card);border-radius:14px;border:1px solid var(--border);padding:20px;margin-top:20px}
+.validation-section h4{font-size:15px;font-weight:700;margin-bottom:16px;color:var(--green-dark);display:flex;align-items:center;gap:8px}
+.validation-item{display:flex;align-items:flex-start;gap:12px;padding:14px;border-radius:10px;margin-bottom:10px;background:var(--bg)}
+.validation-item.ok{background:var(--green-light);border-left:3px solid var(--green)}
+.validation-item.warn{background:var(--orange-light);border-left:3px solid var(--orange)}
+.validation-item.bad{background:var(--red-light);border-left:3px solid var(--red)}
+.validation-item-icon{font-size:18px;flex-shrink:0}
+.validation-item-text{font-size:13px;line-height:1.6}
+.validation-item-text strong{display:block;margin-bottom:4px;font-weight:700;font-size:14px}
+
+/* Feedback Section */
+.feedback-section{background:var(--card);border-radius:16px;border:1px solid var(--border);padding:24px;margin-top:24px;animation:fadeIn 0.5s ease}
+.feedback-header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.feedback-header h4{font-size:16px;font-weight:700}
+.feedback-options{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px}
+.btn-feedback{padding:14px;border-radius:12px;border:2px solid var(--border);background:var(--bg);cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;transition:all 0.2s}
+.btn-feedback:hover{border-color:var(--green);background:var(--green-light)}
+.btn-feedback.selected{border-color:var(--green);background:var(--green);color:white}
+.correction-fields{display:none;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)}
+.correction-fields.show{display:grid}
+.btn-save-feedback{background:var(--green);color:white;border:none;padding:12px 24px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s}
+.btn-save-feedback:hover{background:var(--green-dark)}
+
+/* Loading Overlay */
+.loading-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.loading-overlay.show{display:flex}
+.loading-card{background:var(--card);border-radius:24px;padding:48px;text-align:center;max-width:360px;box-shadow:var(--shadow-xl);animation:scaleIn 0.3s ease}
+.spinner{width:56px;height:56px;border:4px solid var(--green-light);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 24px}
+.loading-text{font-size:18px;font-weight:700;margin-bottom:8px}
+.loading-subtext{font-size:14px;color:var(--text-muted)}
+
+/* Tables */
+.table-container{background:var(--card);border-radius:16px;border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow-sm)}
+.table-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg)}
+.table-header h3{font-size:16px;font-weight:700}
+table{width:100%;border-collapse:collapse}
+th{padding:14px 20px;text-align:left;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;background:var(--bg);border-bottom:1px solid var(--border)}
+td{padding:16px 20px;font-size:14px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover{background:var(--bg)}
+.badge{display:inline-flex;align-items:center;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:700}
+.badge.green{background:var(--green-light);color:var(--green-dark)}
+.badge.red{background:var(--red-light);color:var(--red)}
+.badge.orange{background:var(--orange-light);color:var(--orange)}
+
+/* Credits Page */
+.credit-card{background:linear-gradient(135deg,var(--green-dark),var(--green));border-radius:20px;padding:32px;color:white;margin-bottom:24px;box-shadow:0 8px 24px rgba(29,158,117,0.3);animation:scaleIn 0.5s ease}
+.credit-balance{font-size:56px;font-weight:800;margin:12px 0}
+.credit-label{font-size:14px;opacity:0.9}
+.service-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.service-card{background:var(--card);border-radius:16px;border:2px solid var(--border);padding:24px;transition:all 0.3s}
+.service-card:hover{transform:translateY(-4px);border-color:var(--green)}
+.service-card.featured{border-color:var(--green);background:var(--green-light)}
+.service-name{font-size:16px;font-weight:700;margin-bottom:8px}
+.service-desc{font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.6}
+.service-price{font-size:24px;font-weight:800;color:var(--green)}
+
+/* Responsive */
+@media(max-width:900px){
+  .app-layout{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .form-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:1fr}
+  .feedback-options{grid-template-columns:1fr}
+}
+
+/* Tab Content */
+.tab-content{display:none}
+.tab-content.active{display:block;animation:fadeIn 0.3s ease}
+
+/* Empty State */
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-muted)}
+.empty-state-icon{font-size:64px;margin-bottom:16px;opacity:0.5}
+.empty-state-text{font-size:16px;font-weight:600}
+
+/* Confidence Meter */
+.confidence-meter{height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:8px}
+.confidence-fill{height:100%;border-radius:4px;transition:width 0.5s ease}
+.confidence-fill.high{background:var(--green)}
+.confidence-fill.medium{background:var(--orange)}
+.confidence-fill.low{background:var(--red)}
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav>
+  <a href="#" class="logo">
+    <div class="logo-icon">🔍</div>
+    Aman ga?
+  </a>
+  <div class="nav-actions">
+    <span id="user-display" style="font-size:13px;color:var(--text-muted);font-weight:600">—</span>
+    <button class="btn-nav" onclick="logout()">Keluar</button>
+  </div>
+</nav>
+
+<!-- Login Screen -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-icon">🔍</div>
+      <h1>Aman ga?</h1>
+      <p>Verifikasi bukti pembayaran dengan AI & OCR</p>
+    </div>
+    <div id="login-error" class="error-message"></div>
+    <form id="login-form">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="email" value="admin@amanga.id" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" value="admin123" required>
+      </div>
+      <button type="submit" class="btn-primary" id="btn-login">Masuk</button>
+    </form>
+    <div class="hint-box">
+      <strong>Demo:</strong> admin@amanga.id / admin123
+    </div>
+  </div>
+</div>
+
+<!-- App Screen -->
+<div id="app-screen">
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <a class="nav-item active" onclick="switchTab('dashboard',this)">
+        <span class="nav-item-icon">📊</span>
+        Dashboard
+      </a>
+      <a class="nav-item" onclick="switchTab('upload',this)">
+        <span class="nav-item-icon">📤</span>
+        Upload Pembayaran
+      </a>
+      <a class="nav-item" onclick="switchTab('credits',this)">
+        <span class="nav-item-icon">💳</span>
+        Kredit
+      </a>
+      <a class="nav-item" onclick="switchTab('learning',this)">
+        <span class="nav-item-icon">🧠</span>
+        Self-Learning
+      </a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Dashboard Tab -->
+      <div id="tab-dashboard" class="tab-content active">
+        <div class="page-header">
+          <h1 class="page-title">Dashboard</h1>
+          <p class="page-subtitle">Ringkasan aktivitas verifikasi</p>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total Dicek</div>
+            <div class="stat-value" id="stat-total">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Aman</div>
+            <div class="stat-value green" id="stat-ok">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Mencurigakan</div>
+            <div class="stat-value red" id="stat-bad">0</div>
+          </div>
+        </div>
+        <div class="table-container">
+          <div class="table-header">
+            <h3>Aktivitas Terbaru</h3>
+          </div>
+          <div id="recent-activity">
+            <div class="empty-state">
+              <div class="empty-state-icon">📋</div>
+              <div class="empty-state-text">Belum ada aktivitas</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upload Tab -->
+      <div id="tab-upload" class="tab-content">
+        <div class="page-header">
+          <h1 class="page-title">Upload Bukti Pembayaran</h1>
+          <p class="page-subtitle">Lengkapi semua field untuk verifikasi yang akurat</p>
+        </div>
+        <div class="upload-card">
+          <h3>📸 Upload Screenshot Transfer</h3>
+          <div class="dropzone" id="dropzone">
+            <input type="file" id="file-input" accept="image/jpeg,image/png" onchange="onFileSelect(this)">
+            <div class="dropzone-icon">📎</div>
+            <div class="dropzone-text">Klik atau drag & drop file di sini</div>
+            <div class="dropzone-hint">JPG, PNG — Maks 10MB, Min 200x200px</div>
+          </div>
+          
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Jenis Layanan</label>
+              <select id="service-type">
+                <option value="CEK_DASAR">CEK_DASAR (Auto-approve ≤Rp 1.000)</option>
+                <option value="CEK_DEEP" selected>CEK_DEEP (Analisis Mendalam)</option>
+                <option value="CEK_PLUS">CEK_PLUS (Laporan Lengkap)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Metode Pembayaran</label>
+              <select id="payment-method">
+                <option value="BANK_TRANSFER">Transfer Bank</option>
+                <option value="GOPAY">GoPay</option>
+                <option value="OVO">OVO</option>
+                <option value="DANA">DANA</option>
+                <option value="LINKAJA">LinkAja</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Bank Asal</label>
+              <select id="bank-name">
+                <option value="BCA">BCA</option>
+                <option value="BRI">BRI</option>
+                <option value="BNI">BNI</option>
+                <option value="MANDIRI">Mandiri</option>
+                <option value="PERMATA">Permata</option>
+                <option value="DANAMON">Danamon</option>
+                <option value="CIMB">CIMB Niaga</option>
+                <option value="MAYBANK">Maybank</option>
+                <option value="BTN">BTN</option>
+                <option value="OTHER">Lainnya</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Jumlah Transfer (Rp)</label>
+              <input type="number" id="amount" placeholder="Contoh: 100000" min="100" max="100000000">
+              <small>Min: Rp 100, Max: Rp 100.000.000</small>
+            </div>
+          </div>
+          
+          <div class="form-grid">
+            <div class="form-group">
+              <label>ID Transaksi</label>
+              <input type="text" id="transaction-id" placeholder="Contoh: TRX20240319ABC123" maxlength="50">
+              <small>5-50 karakter, hanya huruf, angka, dash, underscore</small>
+            </div>
+            <div class="form-group">
+              <label>Tanggal Transaksi</label>
+              <input type="datetime-local" id="transaction-date">
+              <small>Tidak boleh lebih dari 1 tahun yang lalu</small>
+            </div>
+          </div>
+          
+          <div class="form-group form-full">
+            <label>Catatan (Opsional)</label>
+            <input type="text" id="notes" placeholder="Misal: transfer BCA ke BRI, untuk pembelian laptop" maxlength="500">
+          </div>
+          
+          <button class="btn-submit" id="btn-submit" onclick="submitPayment()">
+            <span>🔍</span>
+            <span>Analisis Sekarang</span>
+          </button>
+          
+          <div id="result-container"></div>
+        </div>
+      </div>
+
+      <!-- Credits Tab -->
+      <div id="tab-credits" class="tab-content">
+        <div class="page-header">
+          <h1 class="page-title">Kredit Saya</h1>
+          <p class="page-subtitle">Kelola kredit verifikasi</p>
+        </div>
+        <div class="credit-card">
+          <div class="credit-label">Saldo Kredit</div>
+          <div class="credit-balance" id="credit-balance">100</div>
+          <div>kredit tersisa</div>
+        </div>
+        <div class="service-grid" id="service-cards">
+          <div class="service-card">
+            <div class="service-name">CEK_DASAR</div>
+            <div class="service-desc">Verifikasi cepat keaslian bukti pembayaran</div>
+            <div class="service-price">1 kredit</div>
+          </div>
+          <div class="service-card featured">
+            <div class="service-name">CEK_DEEP ⭐</div>
+            <div class="service-desc">Analisis mendalam metadata dan image forensics</div>
+            <div class="service-price">3 kredit</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">CEK_PLUS</div>
+            <div class="service-desc">Laporan forensik lengkap dengan legal analysis</div>
+            <div class="service-price">5 kredit</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Self-Learning Tab -->
+      <div id="tab-learning" class="tab-content">
+        <div class="page-header">
+          <h1 class="page-title">🧠 Self-Learning OCR</h1>
+          <p class="page-subtitle">Bantu sistem kami belajar dari feedback Anda</p>
+        </div>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total Feedback</div>
+            <div class="stat-value" id="learning-total">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Akurasi OCR</div>
+            <div class="stat-value green" id="learning-accuracy">0%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Format Dikenal</div>
+            <div class="stat-value orange" id="learning-formats">0</div>
+          </div>
+        </div>
+
+        <div class="feedback-section">
+          <div class="feedback-header">
+            <h4>📝 Berikan Feedback pada Hasil OCR</h4>
+          </div>
+          <div class="form-group">
+            <label>Pilih Pembayaran</label>
+            <select id="feedback-payment-select">
+              <option value="">-- Pilih dari riwayat --</option>
+            </select>
+          </div>
+          
+          <div id="feedback-form" style="display:none">
+            <div class="feedback-options">
+              <button class="btn-feedback" onclick="selectFeedbackType('CORRECTION',this)">
+                ✏️ Koreksi Hasil
+              </button>
+              <button class="btn-feedback" onclick="selectFeedbackType('CONFIRMATION',this)">
+                ✅ Konfirmasi Benar
+              </button>
+            </div>
+            
+            <div id="correction-fields" class="correction-fields">
+              <div class="form-group">
+                <label>Jumlah yang Benar (Rp)</label>
+                <input type="number" id="correct-amount" placeholder="Contoh: 100000">
+              </div>
+              <div class="form-group">
+                <label>ID Transaksi yang Benar</label>
+                <input type="text" id="correct-txid" placeholder="Contoh: TRX123">
+              </div>
+              <div class="form-group">
+                <label>Tanggal yang Benar</label>
+                <input type="datetime-local" id="correct-date">
+              </div>
+              <div class="form-group">
+                <label>Bank yang Benar</label>
+                <select id="correct-bank">
+                  <option value="BCA">BCA</option>
+                  <option value="BRI">BRI</option>
+                  <option value="BNI">BNI</option>
+                  <option value="MANDIRI">Mandiri</option>
+                  <option value="OTHER">Lainnya</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label>Catatan Tambahan</label>
+              <input type="text" id="feedback-notes" placeholder="Misal: OCR salah baca angka 8 jadi B" maxlength="500">
+            </div>
+            
+            <div class="form-group">
+              <label>Apakah ini receipt asli?</label>
+              <select id="is-legitimate">
+                <option value="true">Ya, receipt asli</option>
+                <option value="false">Tidak, receipt palsu</option>
+                <option value="">Tidak yakin</option>
+              </select>
+            </div>
+            
+            <button class="btn-save-feedback" onclick="submitFeedback()">
+              💾 Simpan Feedback
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container" style="margin-top:24px">
+          <div class="table-header">
+            <h3>Format Receipt yang Dikenali</h3>
+          </div>
+          <div id="receipt-formats-list">
+            <table>
+              <thead>
+                <tr>
+                  <th>Provider</th>
+                  <th>Bank</th>
+                  <th>Samples</th>
+                  <th>Confidence</th>
+                </tr>
+              </thead>
+              <tbody id="receipt-formats-body">
+                <tr><td colspan="4" class="empty-state">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loading">
+  <div class="loading-card">
+    <div class="spinner"></div>
+    <div class="loading-text">AI sedang menganalisis...</div>
+    <div class="loading-subtext">Memeriksa keaslian bukti pembayaran dengan OCR & image forensics</div>
+  </div>
+</div>
+
+<script>
+// State
+let token = localStorage.getItem('ag_token');
+let email = localStorage.getItem('ag_email');
+let payments = [];
+let selectedFeedbackType = null;
+let selectedPaymentId = null;
+
+// Initialize date picker
+document.addEventListener('DOMContentLoaded', function() {
+  var now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  document.getElementById('transaction-date').value = now.toISOString().slice(0,16);
+  
+  // Check auth
+  if (token) showApp();
+});
+
+// Login form
+document.getElementById('login-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const emailInput = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const btn = document.getElementById('btn-login');
+  const errorDiv = document.getElementById('login-error');
+  
+  btn.disabled = true;
+  btn.textContent = 'Masuk...';
+  errorDiv.style.display = 'none';
+  
+  try {
+    const form = new FormData();
+    form.append('username', emailInput);
+    form.append('password', password);
+    form.append('grant_type', 'password');
+    
+    const res = await fetch('/token', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: form
+    });
+    
+    const data = await res.json();
+    
+    if (res.ok && data.access_token) {
+      token = data.access_token;
+      email = data.user?.email || emailInput;
+      localStorage.setItem('ag_token', token);
+      localStorage.setItem('ag_email', email);
+      showApp();
+    } else {
+      errorDiv.textContent = data.detail || 'Email atau password salah.';
+      errorDiv.style.display = 'block';
+    }
+  } catch (err) {
+    errorDiv.textContent = 'Tidak bisa terhubung ke server.';
+    errorDiv.style.display = 'block';
+  }
+  
+  btn.disabled = false;
+  btn.textContent = 'Masuk';
+});
+
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  document.getElementById('user-display').textContent = email || 'User';
+  loadPayments();
+  loadCredits();
+  loadLearningMetrics();
+}
+
+function logout() {
+  localStorage.removeItem('ag_token');
+  localStorage.removeItem('ag_email');
+  token = null;
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app-screen').style.display = 'none';
+}
+
+function switchTab(tabName, el) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + tabName).classList.add('active');
+  if (el) el.classList.add('active');
+  
+  if (tabName === 'learning') {
+    loadLearningMetrics();
+    loadReceiptFormats();
+  }
+}
+
+// File selection
+function onFileSelect(input) {
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File terlalu besar. Maksimum 10MB.');
+      input.value = '';
+      return;
+    }
+    
+    if (!file.type.startsWith('image/')) {
+      alert('File harus berupa gambar (JPG/PNG).');
+      input.value = '';
+      return;
+    }
+    
+    document.getElementById('dropzone').classList.add('dragover');
+    document.querySelector('.dropzone-icon').textContent = '✅';
+    document.querySelector('.dropzone-text').textContent = file.name;
+  }
+}
+
+// Submit payment
+async function submitPayment() {
+  const fileInput = document.getElementById('file-input');
+  const serviceType = document.getElementById('service-type').value;
+  const paymentMethod = document.getElementById('payment-method').value;
+  const bankName = document.getElementById('bank-name').value;
+  const amount = document.getElementById('amount').value;
+  const transactionId = document.getElementById('transaction-id').value;
+  const transactionDate = document.getElementById('transaction-date').value;
+  const notes = document.getElementById('notes').value;
+  
+  // Validation
+  if (!fileInput.files || !fileInput.files[0]) {
+    alert('Pilih file bukti pembayaran.');
+    return;
+  }
+  if (!amount || amount < 100 || amount > 100000000) {
+    alert('Jumlah transfer harus antara Rp 100 - Rp 100.000.000');
+    return;
+  }
+  if (!transactionId || transactionId.length < 5 || transactionId.length > 50) {
+    alert('ID Transaksi harus 5-50 karakter');
+    return;
+  }
+  if (!transactionDate) {
+    alert('Pilih tanggal transaksi');
+    return;
+  }
+  
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.innerHTML = '<span>⏳</span><span>Menganalisis...</span>';
+  document.getElementById('loading').classList.add('show');
+  
+  const fd = new FormData();
+  fd.append('proof_image', fileInput.files[0]);
+  fd.append('service_type', serviceType);
+  fd.append('payment_method', paymentMethod);
+  fd.append('bank_name', bankName);
+  fd.append('amount', amount);
+  fd.append('transaction_id', transactionId);
+  fd.append('transaction_date', transactionDate);
+  if (notes) fd.append('notes', notes);
+  
+  try {
+    const res = await fetch('/payment/upload', {
+      method: 'POST',
+      headers: {'Authorization': 'Bearer ' + token},
+      body: fd
+    });
+    
+    const data = await res.json();
+    
+    document.getElementById('loading').classList.remove('show');
+    
+    if (res.ok) {
+      showResult(data, serviceType);
+      loadPayments();
+    } else if (res.status === 401) {
+      logout();
+    } else {
+      showError(data);
+    }
+  } catch (err) {
+    document.getElementById('loading').classList.remove('show');
+    alert('Terjadi kesalahan. Silakan coba lagi.');
+  }
+  
+  btn.disabled = false;
+  btn.innerHTML = '<span>🔍</span><span>Analisis Sekarang</span>';
+}
+
+function showResult(data, serviceType) {
+  const container = document.getElementById('result-container');
+  const status = data.status || 'PENDING';
+  const ok = status === 'APPROVED' || status === 'AUTO_APPROVED';
+  const bad = status === 'REJECTED' || status === 'FLAGGED';
+  const cls = ok ? 'approved' : bad ? 'rejected' : 'pending';
+  const icon = ok ? '✅' : bad ? '❌' : '⏳';
+  const title = ok ? 'AMAN — Pembayaran Terverifikasi' : bad ? 'MENCURIGAKAN — Perlu Review Manual' : 'MENUNGGU — Sedang Diproses';
+  
+  let html = `<div class="result-card ${cls}">
+    <div class="result-header">
+      <div class="result-icon">${icon}</div>
+      <div>
+        <div class="result-title">${title}</div>
+        <div class="result-message">${serviceType} — ${data.message || ''}</div>
+      </div>
+    </div>`;
+  
+  // Validation details
+  if (data.validation) {
+    html += `<div class="validation-section">
+      <h4>📋 Validasi File</h4>
+      <div class="validation-item ok">
+        <div class="validation-item-icon">✓</div>
+        <div class="validation-item-text">
+          <strong>File Valid</strong>
+          Ukuran: ${(data.validation.file_size / 1024).toFixed(1)} KB | 
+          Dimensi: ${data.validation.image_dimensions}
+        </div>
+      </div>
+    </div>`;
+  }
+  
+  // OCR details
+  if (data.ocr) {
+    const ocrOk = data.ocr.matches_form !== false;
+    html += `<div class="validation-section">
+      <h4>📝 Hasil OCR</h4>
+      <div class="validation-item ${ocrOk ? 'ok' : 'bad'}">
+        <div class="validation-item-icon">${ocrOk ? '✓' : '✗'}</div>
+        <div class="validation-item-text">
+          <strong>${ocrOk ? 'Data Cocok' : 'Data Tidak Cocok'}</strong>
+          Amount: Rp ${data.ocr.extracted_amount || 'N/A'} | 
+          Confidence: ${(data.ocr.confidence * 100).toFixed(1)}%
+        </div>
+      </div>
+      ${!ocrOk && data.ocr.mismatches ? 
+        `<div style="margin-top:12px;font-size:13px;color:var(--red)">
+          ${data.ocr.mismatches.join('<br>')}
+        </div>` : ''}
+    </div>`;
+  }
+  
+  // Image analysis
+  if (data.image_analysis) {
+    const manipOk = !data.image_analysis.manipulation_detected;
+    html += `<div class="validation-section">
+      <h4>🖼️ Analisis Gambar</h4>
+      <div class="validation-item ${manipOk ? 'ok' : 'bad'}">
+        <div class="validation-item-icon">${manipOk ? '✓' : '⚠️'}</div>
+        <div class="validation-item-text">
+          <strong>${manipOk ? 'Tidak Ada Manipulasi' : 'Manipulasi Terdeteksi'}</strong>
+          Risk Level: ${data.image_analysis.risk_level} | 
+          Quality: ${(data.image_analysis.quality_score * 100).toFixed(1)}%
+        </div>
+      </div>
+      ${data.image_analysis.indicators?.length ? 
+        data.image_analysis.indicators.map(i => 
+          `<div class="validation-item warn">
+            <div class="validation-item-icon">⚠</div>
+            <div class="validation-item-text"><strong>Indicator</strong>${i}</div>
+          </div>`
+        ).join('') : ''}
+    </div>`;
+  }
+  
+  // Fraud assessment
+  if (data.fraud_assessment) {
+    const riskOk = data.fraud_assessment.risk_level === 'LOW';
+    html += `<div class="validation-section">
+      <h4>🛡️ Penilaian Fraud</h4>
+      <div class="validation-item ${riskOk ? 'ok' : riskOk === false ? 'warn' : 'bad'}">
+        <div class="validation-item-icon">${riskOk ? '✓' : '⚠'}</div>
+        <div class="validation-item-text">
+          <strong>Risk Score: ${data.fraud_assessment.risk_score}/200</strong>
+          Level: ${data.fraud_assessment.risk_level}
+        </div>
+      </div>
+      ${data.fraud_assessment.risk_factors?.length ? 
+        `<div style="margin-top:12px">
+          <div style="font-size:13px;font-weight:600;margin-bottom:8px">Faktor Risiko:</div>
+          ${data.fraud_assessment.risk_factors.map(f => 
+            `<div class="validation-item warn">
+              <div class="validation-item-icon">⚠</div>
+              <div class="validation-item-text">${f}</div>
+            </div>`
+          ).join('')}
+        </div>` : ''}
+    </div>`;
+  }
+  
+  // Feedback section
+  html += `<div class="feedback-section">
+    <div class="feedback-header">
+      <h4>📝 Bantu Kami Belajar!</h4>
+    </div>
+    <p style="font-size:14px;color:var(--text-muted);margin-bottom:16px">
+      Apakah hasil analisis ini benar? Feedback Anda membantu sistem kami menjadi lebih pintar.
+    </p>
+    <div class="feedback-options">
+      <button class="btn-feedback" onclick="prepareFeedback('${data.payment_id}', 'CORRECTION')">
+        ✏️ Ada yang Salah
+      </button>
+      <button class="btn-feedback" onclick="prepareFeedback('${data.payment_id}', 'CONFIRMATION')">
+        ✅ Sudah Benar
+      </button>
+    </div>
+    <div id="feedback-input-${data.payment_id}" style="display:none;margin-top:16px">
+      <div class="form-group">
+        <label>Catatan Koreksi</label>
+        <input type="text" id="feedback-note-${data.payment_id}" placeholder="Jelaskan apa yang salah..." maxlength="500">
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Jumlah yang Benar</label>
+          <input type="number" id="feedback-amount-${data.payment_id}">
+        </div>
+        <div class="form-group">
+          <label>ID Transaksi yang Benar</label>
+          <input type="text" id="feedback-txid-${data.payment_id}">
+        </div>
+      </div>
+      <button class="btn-save-feedback" onclick="submitInlineFeedback('${data.payment_id}')">
+        💾 Simpan Feedback
+      </button>
+    </div>
+  </div>`;
+  
+  html += '</div>';
+  container.innerHTML = html;
+  
+  // Store payment for feedback
+  payments.unshift({
+    id: data.payment_id,
+    status: status,
+    service_type: serviceType,
+    created_at: new Date().toISOString(),
+    ocr: data.ocr,
+    amount: data.ocr?.extracted_amount || parseInt(amount)
+  });
+  
+  updateStats();
+  updateFeedbackSelect();
+}
+
+function showError(data) {
+  const container = document.getElementById('result-container');
+  const detail = typeof data.detail === 'object' ? 
+    data.detail.error + ': ' + (data.detail.risk_factors || []).join(', ') : 
+    (data.detail || data.message || 'Terjadi kesalahan.');
+  
+  container.innerHTML = `<div class="result-card rejected">
+    <div class="result-header">
+      <div class="result-icon">❌</div>
+      <div>
+        <div class="result-title">GAGAL</div>
+        <div class="result-message">${detail}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// Feedback functions
+function prepareFeedback(paymentId, type) {
+  selectedPaymentId = paymentId;
+  selectedFeedbackType = type;
+  const feedbackDiv = document.getElementById('feedback-input-' + paymentId);
+  if (feedbackDiv) {
+    feedbackDiv.style.display = feedbackDiv.style.display === 'none' ? 'block' : 'none';
+  }
+}
+
+async function submitInlineFeedback(paymentId) {
+  const note = document.getElementById('feedback-note-' + paymentId).value;
+  const amount = document.getElementById('feedback-amount-' + paymentId).value;
+  const txid = document.getElementById('feedback-txid-' + paymentId).value;
+  
+  const feedbackData = {
+    payment_proof_id: paymentId,
+    feedback_type: selectedFeedbackType || 'CORRECTION',
+    notes: note,
+    corrected_amount: amount ? parseInt(amount) : null,
+    corrected_transaction_id: txid || null,
+    corrected_fields: []
+  };
+  
+  if (amount) feedbackData.corrected_fields.push('amount');
+  if (txid) feedbackData.corrected_fields.push('transaction_id');
+  
+  try {
+    const res = await fetch('/feedback/submit', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(feedbackData)
+    });
+    
+    if (res.ok) {
+      alert('✅ Terima kasih! Feedback Anda membantu sistem kami belajar.');
+      document.getElementById('feedback-input-' + paymentId).style.display = 'none';
+    }
+  } catch (err) {
+    alert('❌ Gagal menyimpan feedback.');
+  }
+}
+
+async function loadPayments() {
+  try {
+    const res = await fetch('/payment/my', {
+      headers: {'Authorization': 'Bearer ' + token}
+    });
+    if (res.ok) {
+      payments = await res.json();
+      updateStats();
+      renderActivity();
+      updateFeedbackSelect();
+    }
+  } catch (err) {}
+}
+
+function updateStats() {
+  document.getElementById('stat-total').textContent = payments.length;
+  document.getElementById('stat-ok').textContent = payments.filter(p => 
+    p.status === 'APPROVED' || p.status === 'AUTO_APPROVED'
+  ).length;
+  document.getElementById('stat-bad').textContent = payments.filter(p => 
+    p.status === 'REJECTED' || p.status === 'FLAGGED'
+  ).length;
+}
+
+function renderActivity() {
+  const container = document.getElementById('recent-activity');
+  if (!payments || payments.length === 0) {
+    container.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">📋</div>
+      <div class="empty-state-text">Belum ada aktivitas</div>
+    </div>`;
+    return;
+  }
+  
+  const rows = payments.slice(0, 10).map(p => {
+    const date = new Date(p.created_at).toLocaleDateString('id-ID', {
+      day: 'numeric', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+    const status = p.status || 'PENDING';
+    const badgeClass = status === 'APPROVED' || status === 'AUTO_APPROVED' ? 'green' :
+                       status === 'REJECTED' || status === 'FLAGGED' ? 'red' : 'orange';
+    const badgeText = status === 'APPROVED' || status === 'AUTO_APPROVED' ? 'Aman' :
+                      status === 'REJECTED' || status === 'FLAGGED' ? 'Mencurigakan' : 'Menunggu';
+    
+    return `<tr>
+      <td style="font-family:monospace;font-size:12px;color:var(--text-muted)">${(p.id||'').toString().substring(0,14)}</td>
+      <td>${p.service_type || '—'}</td>
+      <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+      <td style="color:var(--text-muted)">${date}</td>
+    </tr>`;
+  }).join('');
+  
+  container.innerHTML = `<table>
+    <thead><tr><th>ID</th><th>Layanan</th><th>Status</th><th>Tanggal</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+async function loadCredits() {
+  try {
+    const res = await fetch('/payment/credits', {
+      headers: {'Authorization': 'Bearer ' + token}
+    });
+    if (res.ok) {
+      const data = await res.json();
+      document.getElementById('credit-balance').textContent = data.credits || data.balance || '100';
+    }
+  } catch (err) {}
+}
+
+// Learning functions
+function updateFeedbackSelect() {
+  const select = document.getElementById('feedback-payment-select');
+  if (!select) return;
+  
+  select.innerHTML = '<option value="">-- Pilih dari riwayat --</option>';
+  payments.slice(0, 20).forEach(p => {
+    select.innerHTML += `<option value="${p.id}">${p.service_type} - Rp ${p.amount || 'N/A'}</option>`;
+  });
+  
+  select.onchange = () => {
+    selectedPaymentId = select.value;
+    if (selectedPaymentId) {
+      document.getElementById('feedback-form').style.display = 'block';
+    }
+  };
+}
+
+async function loadLearningMetrics() {
+  try {
+    const res = await fetch('/feedback/learning-metrics', {
+      headers: {'Authorization': 'Bearer ' + token}
+    });
+    if (res.ok) {
+      const data = await res.json();
+      document.getElementById('learning-total').textContent = data.total_feedback || 0;
+      document.getElementById('learning-accuracy').textContent = 
+        ((data.overall_accuracy || 0) * 100).toFixed(0) + '%';
+    }
+  } catch (err) {}
+}
+
+async function loadReceiptFormats() {
+  try {
+    const res = await fetch('/receipt-formats');
+    if (res.ok) {
+      const data = await res.json();
+      const tbody = document.getElementById('receipt-formats-body');
+      tbody.innerHTML = data.formats.map(f => `
+        <tr>
+          <td><strong>${f.provider}</strong></td>
+          <td>${f.bank_name}</td>
+          <td>${f.sample_count}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="confidence-meter" style="width:60px">
+                <div class="confidence-fill ${f.confidence_score > 0.7 ? 'high' : f.confidence_score > 0.4 ? 'medium' : 'low'}" 
+                     style="width:${f.confidence_score * 100}%"></div>
+              </div>
+              <span>${(f.confidence_score * 100).toFixed(0)}%</span>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+      document.getElementById('learning-formats').textContent = data.formats.length;
+    }
+  } catch (err) {}
+}
+
+function selectFeedbackType(type, btn) {
+  selectedFeedbackType = type;
+  document.querySelectorAll('.btn-feedback').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  
+  const correctionFields = document.getElementById('correction-fields');
+  if (type === 'CORRECTION') {
+    correctionFields.classList.add('show');
+  } else {
+    correctionFields.classList.remove('show');
+  }
+}
+
+async function submitFeedback() {
+  if (!selectedPaymentId) {
+    alert('Pilih pembayaran terlebih dahulu.');
+    return;
+  }
+  
+  const feedbackData = {
+    payment_proof_id: selectedPaymentId,
+    feedback_type: selectedFeedbackType || 'CORRECTION',
+    notes: document.getElementById('feedback-notes').value,
+    corrected_amount: document.getElementById('correct-amount').value ? 
+                      parseInt(document.getElementById('correct-amount').value) : null,
+    corrected_transaction_id: document.getElementById('correct-txid').value || null,
+    corrected_date: document.getElementById('correct-date').value || null,
+    corrected_bank: document.getElementById('correct-bank').value || null,
+    corrected_fields: [],
+    is_legitimate_receipt: document.getElementById('is-legitimate').value ? 
+                           document.getElementById('is-legitimate').value === 'true' : null,
+    quality_rating: 5
+  };
+  
+  if (feedbackData.corrected_amount) feedbackData.corrected_fields.push('amount');
+  if (feedbackData.corrected_transaction_id) feedbackData.corrected_fields.push('transaction_id');
+  if (feedbackData.corrected_date) feedbackData.corrected_fields.push('date');
+  if (feedbackData.corrected_bank) feedbackData.corrected_fields.push('bank');
+  
+  try {
+    const res = await fetch('/feedback/submit', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(feedbackData)
+    });
+    
+    if (res.ok) {
+      alert('✅ Terima kasih! Feedback Anda membantu sistem kami belajar.');
+      document.getElementById('feedback-form').style.display = 'none';
+      loadLearningMetrics();
+    } else {
+      alert('❌ Gagal menyimpan feedback.');
+    }
+  } catch (err) {
+    alert('❌ Terjadi kesalahan.');
+  }
+}
+</script>
+</body>
+</html>

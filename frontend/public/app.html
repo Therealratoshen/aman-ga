@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aman ga? — Verifikasi Bukti Pembayaran</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+:root{--green:#1D9E75;--gl:#E1F5EE;--gd:#085041;--red:#E24B4A;--rl:#FCEBEB;--am:#EF9F27;--al:#FAEEDA;--bg:#F7F8F5;--card:#FFF;--text:#1a1a1a;--muted:#6b7280;--border:#e5e7eb;--blue:#3B82F6;--bl:#DBEAFE}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+nav{background:var(--card);border-bottom:1px solid var(--border);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;color:var(--gd)}
+.lb{background:var(--green);color:white;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.btn-out{background:none;border:1px solid var(--border);padding:6px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-family:inherit;color:var(--muted);transition:all 0.2s}
+.btn-out:hover{background:var(--bg);color:var(--text)}
+#ls{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#E1F5EE,#F7F8F5,#E1F5EE)}
+.lc{background:white;border-radius:20px;padding:48px 40px;width:100%;max-width:420px;box-shadow:0 4px 40px rgba(0,0,0,0.08);border:1px solid var(--border)}
+.ll{text-align:center;margin-bottom:32px}
+.ll .b{background:var(--green);color:white;width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 16px;box-shadow:0 4px 14px rgba(29,158,117,0.3)}
+.ll h1{font-size:28px;font-weight:800;color:var(--gd)}
+.fg{margin-bottom:16px}
+.fg label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text)}
+.fg input,.fg select{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit;outline:none;transition:all 0.2s;background:white}
+.fg input:focus,.fg select:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--gl)}
+.fg small{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.bp{width:100%;background:var(--green);color:white;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:8px;transition:all 0.2s;box-shadow:0 2px 8px rgba(29,158,117,0.2)}
+.bp:hover{background:var(--gd);transform:translateY(-1px);box-shadow:0 4px 12px rgba(29,158,117,0.3)}
+.bp:disabled{background:#9ca3af;cursor:not-allowed;transform:none}
+.hint{margin-top:20px;background:var(--gl);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--gd);line-height:1.6;border:1px solid rgba(29,158,117,0.2)}
+.err{background:var(--rl);color:var(--red);border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:16px;display:none;border:1px solid rgba(226,75,74,0.2)}
+#as{display:none}
+.al{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 60px)}
+.sb{background:var(--card);border-right:1px solid var(--border);padding:20px 12px}
+.ni{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;color:var(--muted);margin-bottom:4px;transition:all 0.2s}
+.ni:hover{background:var(--bg);color:var(--text)}
+.ni.active{background:var(--gl);color:var(--gd)}
+.mc{padding:28px 32px;max-width:1000px}
+.pt{font-size:24px;font-weight:800;margin-bottom:6px}
+.ps{font-size:14px;color:var(--muted);margin-bottom:28px}
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
+.sc{background:var(--card);border-radius:14px;padding:20px;border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,0.05)}
+.sl{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
+.sv{font-size:28px;font-weight:800}
+.sv.g{color:var(--green)}
+.sv.r{color:var(--red)}
+.uc{background:var(--card);border-radius:16px;border:1px solid var(--border);padding:28px;margin-bottom:24px;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
+.uc h3{font-size:16px;font-weight:700;margin-bottom:20px}
+.uz{border:2px dashed var(--border);border-radius:12px;padding:40px 20px;text-align:center;cursor:pointer;transition:all 0.3s;position:relative;background:var(--bg)}
+.uz:hover,.uz.hf{border-color:var(--green);background:var(--gl)}
+.uz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.ufg{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+select,input[type=text],input[type=number],input[type=datetime-local]{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;outline:none;background:white;transition:all 0.2s}
+select:focus,input:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--gl)}
+.bs{margin-top:20px;background:var(--green);color:white;border:none;padding:13px 28px;border-radius:10px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;transition:all 0.2s;box-shadow:0 2px 8px rgba(29,158,117,0.2)}
+.bs:hover{background:var(--gd);transform:translateY(-1px)}
+.bs:disabled{background:#9ca3af;cursor:not-allowed;transform:none}
+.rc{border-radius:14px;padding:24px;margin-top:20px;display:none}
+.rc.ap{background:var(--gl);border:1.5px solid var(--green)}
+.rc.rj{background:var(--rl);border:1.5px solid var(--red)}
+.rc.pd{background:var(--al);border:1.5px solid var(--am)}
+.rh{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.ri{font-size:28px}
+.rt{font-size:18px;font-weight:700}
+.rd{font-size:14px;line-height:1.7}
+.hc{background:var(--card);border-radius:16px;border:1px solid var(--border);overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
+.hh{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg)}
+.hh h3{font-size:15px;font-weight:700}
+table{width:100%;border-collapse:collapse}
+th{padding:12px 24px;text-align:left;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;background:var(--bg);border-bottom:1px solid var(--border)}
+td{padding:14px 24px;font-size:14px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+.badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700}
+.ba{background:var(--gl);color:var(--gd)}
+.br{background:var(--rl);color:var(--red)}
+.bw{background:var(--al);color:#854F0B}
+.lo{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.lo.show{display:flex}
+.lb2{background:white;border-radius:20px;padding:40px 48px;text-align:center;max-width:320px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+.sp{width:48px;height:48px;border:4px solid var(--gl);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tc{display:none}
+.tc.active{display:block}
+.cc{background:linear-gradient(135deg,var(--gd),var(--green));border-radius:16px;padding:28px;color:white;margin-bottom:24px;box-shadow:0 4px 14px rgba(29,158,117,0.3)}
+.svc{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.scard{background:var(--card);border-radius:14px;border:1.5px solid var(--border);padding:20px;transition:all 0.2s}
+.scard:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+.es{text-align:center;padding:60px 20px;color:var(--muted)}
+.vl{background:var(--card);border-radius:14px;border:1px solid var(--border);padding:20px;margin-top:20px}
+.vl h4{font-size:14px;font-weight:700;margin-bottom:12px;color:var(--gd)}
+.vi{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;padding:12px;border-radius:10px;background:var(--bg)}
+.vi.ok{background:var(--gl);border-left:3px solid var(--green)}
+.vi.bad{background:var(--rl);border-left:3px solid var(--red)}
+.vi.warn{background:var(--al);border-left:3px solid var(--am)}
+.vi .ic{font-size:18px;flex-shrink:0}
+.vi .tx{font-size:13px;line-height:1.6}
+.vi .tx strong{display:block;margin-bottom:4px;font-weight:700}
+@media(max-width:768px){.al{grid-template-columns:1fr}.sb{display:none}.ufg{grid-template-columns:1fr}.sg{grid-template-columns:1fr}.svc{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="ls">
+  <div class="lc">
+    <div class="ll">
+      <div class="b">🔍</div>
+      <h1>Aman ga?</h1>
+      <p style="font-size:14px;color:#6b7280;margin-top:6px">Verifikasi bukti pembayaran dengan AI & OCR</p>
+    </div>
+    <div id="le" class="err">Email atau password salah.</div>
+    <div class="fg"><label>Email</label><input type="email" id="em" value="admin@amanga.id"></div>
+    <div class="fg"><label>Password</label><input type="password" id="pw" value="admin123"></div>
+    <button class="bp" id="btnLogin">Masuk</button>
+    <div class="hint"><strong>Demo:</strong> admin@amanga.id / admin123</div>
+  </div>
+</div>
+
+<div id="as">
+  <nav>
+    <div class="logo"><div class="lb">🔍</div>Aman ga?</div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span style="font-size:13px;color:var(--muted)" id="nu">—</span>
+      <button class="btn-out" onclick="logout()">Keluar</button>
+    </div>
+  </nav>
+  <div class="al">
+    <div class="sb">
+      <div class="ni active" onclick="sw('dashboard',this)">📊 Dashboard</div>
+      <div class="ni" onclick="sw('upload',this)">📤 Upload Pembayaran</div>
+      <div class="ni" onclick="sw('credits',this)">💳 Kredit</div>
+    </div>
+    <div class="mc">
+      <div class="tc active" id="tab-dashboard">
+        <div class="pt">Dashboard</div>
+        <div class="ps">Ringkasan aktivitas verifikasi</div>
+        <div class="sg">
+          <div class="sc"><div class="sl">Total Dicek</div><div class="sv" id="s-total">0</div></div>
+          <div class="sc"><div class="sl">Aman</div><div class="sv g" id="s-ok">0</div></div>
+          <div class="sc"><div class="sl">Mencurigakan</div><div class="sv r" id="s-bad">0</div></div>
+        </div>
+        <div class="hc"><div class="hh"><h3>Aktivitas Terbaru</h3></div><div id="d-recent"><div class="es"><div style="font-size:48px;margin-bottom:16px">🔍</div><div style="font-size:16px;font-weight:600;color:var(--text)">Belum ada aktivitas</div></div></div></div>
+      </div>
+
+      <div class="tc" id="tab-upload">
+        <div class="pt">Upload Bukti Pembayaran</div>
+        <div class="ps">Lengkapi semua field untuk verifikasi yang akurat</div>
+        <div class="uc">
+          <h3>📸 Upload Bukti Transfer</h3>
+          <div class="uz" id="uz">
+            <input type="file" id="pf" accept="image/jpeg,image/png" onchange="onFile(this)">
+            <div style="font-size:40px;margin-bottom:12px" id="ui">📎</div>
+            <div style="font-size:15px;font-weight:700;margin-bottom:6px" id="ut">Klik untuk upload screenshot</div>
+            <div style="font-size:13px;color:var(--muted)">JPG, PNG — Maks 10MB, Min 200x200px</div>
+          </div>
+          
+          <div class="ufg">
+            <div class="fg">
+              <label>Jenis Layanan</label>
+              <select id="st">
+                <option value="CEK_DASAR">CEK_DASAR (Auto-approve ≤Rp 1.000)</option>
+                <option value="CEK_DEEP" selected>CEK_DEEP (Analisis Mendalam)</option>
+                <option value="CEK_PLUS">CEK_PLUS (Laporan Lengkap)</option>
+              </select>
+              <small>Pilih sesuai kebutuhan verifikasi</small>
+            </div>
+            <div class="fg">
+              <label>Metode Pembayaran</label>
+              <select id="pm">
+                <option value="BANK_TRANSFER">Transfer Bank</option>
+                <option value="GOPAY">GoPay</option>
+                <option value="OVO">OVO</option>
+                <option value="DANA">DANA</option>
+                <option value="LINKAJA">LinkAja</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="ufg">
+            <div class="fg">
+              <label>Bank Asal</label>
+              <select id="bn">
+                <option value="BCA">BCA</option>
+                <option value="BRI">BRI</option>
+                <option value="BNI">BNI</option>
+                <option value="MANDIRI">Mandiri</option>
+                <option value="PERMATA">Permata</option>
+                <option value="DANAMON">Danamon</option>
+                <option value="CIMB">CIMB Niaga</option>
+                <option value="MAYBANK">Maybank</option>
+                <option value="BTN">BTN</option>
+                <option value="OTHER">Lainnya</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label>Jumlah Transfer (Rp)</label>
+              <input type="number" id="am" placeholder="Contoh: 100000" min="100" max="100000000">
+              <small>Min: Rp 100, Max: Rp 100.000.000</small>
+            </div>
+          </div>
+          
+          <div class="ufg">
+            <div class="fg">
+              <label>ID Transaksi</label>
+              <input type="text" id="ti" placeholder="Contoh: TRX20240101ABC123" maxlength="50">
+              <small>5-50 karakter, hanya huruf, angka, dash, underscore</small>
+            </div>
+            <div class="fg">
+              <label>Tanggal Transaksi</label>
+              <input type="datetime-local" id="td">
+              <small>Tidak boleh lebih dari 1 tahun yang lalu</small>
+            </div>
+          </div>
+          
+          <div class="fg">
+            <label>Catatan (Opsional)</label>
+            <input type="text" id="nt" placeholder="Misal: transfer BCA ke BRI, untuk pembelian laptop" maxlength="500">
+          </div>
+          
+          <button class="bs" id="btnSubmit" onclick="doUpload()">🔍 Analisis Sekarang</button>
+          <div id="ra"></div>
+        </div>
+      </div>
+
+      <div class="tc" id="tab-credits">
+        <div class="pt">Kredit Saya</div>
+        <div class="ps">Kelola kredit verifikasi</div>
+        <div class="cc"><div style="font-size:13px;opacity:.8;margin-bottom:8px">Saldo Kredit</div><div style="font-size:48px;font-weight:700" id="cr">100</div><div style="font-size:13px;opacity:.7;margin-top:8px">kredit tersisa</div></div>
+        <div class="svc">
+          <div class="scard"><div style="font-size:15px;font-weight:700;margin-bottom:6px">CEK_DASAR</div><div style="font-size:13px;color:var(--muted);margin-bottom:12px">Verifikasi cepat keaslian</div><div style="font-size:20px;font-weight:700;color:var(--green)">1 kredit</div></div>
+          <div class="scard" style="border-color:var(--green)"><div style="font-size:15px;font-weight:700;margin-bottom:6px">CEK_DEEP ⭐</div><div style="font-size:13px;color:var(--muted);margin-bottom:12px">Analisis mendalam metadata</div><div style="font-size:20px;font-weight:700;color:var(--green)">3 kredit</div></div>
+          <div class="scard"><div style="font-size:15px;font-weight:700;margin-bottom:6px">CEK_PLUS</div><div style="font-size:13px;color:var(--muted);margin-bottom:12px">Laporan forensik lengkap</div><div style="font-size:20px;font-weight:700;color:var(--green)">5 kredit</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="lo" id="loading">
+  <div class="lb2">
+    <div class="sp"></div>
+    <div style="font-size:16px;font-weight:700;margin-bottom:8px">AI sedang menganalisis...</div>
+    <div style="font-size:13px;color:var(--muted)">Memeriksa keaslian bukti pembayaran dengan OCR & image analysis</div>
+  </div>
+</div>
+
+<script>
+var token = localStorage.getItem('ag_token');
+var email = localStorage.getItem('ag_email');
+var pays = [];
+
+// Set default datetime to now
+document.addEventListener('DOMContentLoaded', function() {
+  var now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  document.getElementById('td').value = now.toISOString().slice(0,16);
+});
+
+window.onload = function() {
+  if (token) showApp();
+};
+
+document.getElementById('btnLogin').onclick = function() {
+  var em = document.getElementById('em').value;
+  var pw = document.getElementById('pw').value;
+  var btn = document.getElementById('btnLogin');
+  var err = document.getElementById('le');
+  
+  if (!em || !pw) {
+    err.textContent = 'Email dan password harus diisi.';
+    err.style.display = 'block';
+    return;
+  }
+  
+  btn.disabled = true;
+  btn.textContent = 'Masuk...';
+  err.style.display = 'none';
+  
+  fetch('/token', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body: 'username=' + encodeURIComponent(em) + '&password=' + encodeURIComponent(pw) + '&grant_type=password'
+  }).then(function(r) {
+    return r.json().then(function(d) { return {ok: r.ok, data: d}; });
+  }).then(function(res) {
+    if (res.ok && res.data.access_token) {
+      token = res.data.access_token;
+      email = res.data.user ? res.data.user.email : em;
+      localStorage.setItem('ag_token', token);
+      localStorage.setItem('ag_email', email);
+      showApp();
+    } else {
+      err.style.display = 'block';
+      err.textContent = res.data.detail || 'Email atau password salah.';
+    }
+    btn.disabled = false;
+    btn.textContent = 'Masuk';
+  }).catch(function() {
+    err.style.display = 'block';
+    err.textContent = 'Tidak bisa terhubung ke server.';
+    btn.disabled = false;
+    btn.textContent = 'Masuk';
+  });
+};
+
+function showApp() {
+  document.getElementById('ls').style.display = 'none';
+  document.getElementById('as').style.display = 'block';
+  document.getElementById('nu').textContent = email || 'User';
+  loadHist();
+  loadCredits();
+}
+
+function logout() {
+  localStorage.removeItem('ag_token');
+  localStorage.removeItem('ag_email');
+  token = null;
+  document.getElementById('ls').style.display = 'flex';
+  document.getElementById('as').style.display = 'none';
+}
+
+function sw(name, el) {
+  document.querySelectorAll('.tc').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.ni').forEach(function(n) { n.classList.remove('active'); });
+  document.getElementById('tab-' + name).classList.add('active');
+  if (el) el.classList.add('active');
+}
+
+function onFile(input) {
+  if (input.files && input.files[0]) {
+    var file = input.files[0];
+    
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File terlalu besar. Maksimum 10MB.');
+      input.value = '';
+      return;
+    }
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('File harus berupa gambar (JPG/PNG).');
+      input.value = '';
+      return;
+    }
+    
+    document.getElementById('uz').classList.add('hf');
+    document.getElementById('ui').textContent = '✅';
+    document.getElementById('ut').textContent = file.name;
+  }
+}
+
+function doUpload() {
+  var fi = document.getElementById('pf');
+  var stype = document.getElementById('st').value;
+  var pm = document.getElementById('pm').value;
+  var bn = document.getElementById('bn').value;
+  var amount = document.getElementById('am').value;
+  var tid = document.getElementById('ti').value;
+  var tdate = document.getElementById('td').value;
+  var notes = document.getElementById('nt').value;
+  var btn = document.getElementById('btnSubmit');
+  var ra = document.getElementById('ra');
+  
+  // Validate all required fields
+  if (!fi.files || !fi.files[0]) { alert('Pilih file bukti pembayaran.'); return; }
+  if (!amount || amount < 100 || amount > 100000000) { alert('Jumlah transfer harus antara Rp 100 - Rp 100.000.000'); return; }
+  if (!tid || tid.length < 5 || tid.length > 50) { alert('ID Transaksi harus 5-50 karakter'); return; }
+  if (!tdate) { alert('Pilih tanggal transaksi'); return; }
+  
+  // Check for suspicious transaction ID patterns
+  var suspiciousPatterns = ['test', 'fake', 'demo', 'sample', 'example'];
+  if (suspiciousPatterns.some(p => tid.toLowerCase().includes(p))) {
+    alert('ID Transaksi tidak boleh mengandung kata: test, fake, demo, sample, example');
+    return;
+  }
+  
+  btn.disabled = true;
+  btn.textContent = 'Menganalisis...';
+  document.getElementById('loading').classList.add('show');
+  ra.innerHTML = '';
+  
+  var fd = new FormData();
+  fd.append('proof_image', fi.files[0]);
+  fd.append('service_type', stype);
+  fd.append('payment_method', pm);
+  fd.append('bank_name', bn);
+  fd.append('amount', amount);
+  fd.append('transaction_id', tid);
+  fd.append('transaction_date', tdate);
+  if (notes) fd.append('notes', notes);
+  
+  fetch('/payment/upload', {
+    method: 'POST',
+    headers: {'Authorization': 'Bearer ' + token},
+    body: fd
+  }).then(function(r) {
+    return r.json().then(function(d) { return {ok: r.ok, status: r.status, data: d}; });
+  }).then(function(res) {
+    document.getElementById('loading').classList.remove('show');
+    if (res.ok) { 
+      showResult(res.data, stype); 
+      loadHist(); 
+    } else if (res.status === 401) { 
+      logout(); 
+    } else { 
+      showError(res.data); 
+    }
+    btn.disabled = false;
+    btn.textContent = '🔍 Analisis Sekarang';
+  }).catch(function() {
+    document.getElementById('loading').classList.remove('show');
+    alert('Terjadi kesalahan. Silakan coba lagi.');
+    btn.disabled = false;
+    btn.textContent = '🔍 Analisis Sekarang';
+  });
+}
+
+function showResult(data, stype) {
+  var ra = document.getElementById('ra');
+  var status = data.status || 'PENDING';
+  var ok = status === 'APPROVED' || status === 'AUTO_APPROVED';
+  var bad = status === 'REJECTED' || status === 'FLAGGED';
+  var cls = ok ? 'ap' : bad ? 'rj' : 'pd';
+  var icon = ok ? '✅' : bad ? '❌' : '⏳';
+  var title = ok ? 'AMAN — Pembayaran Terverifikasi' : bad ? 'MENCURIGAKAN — Perlu Review Manual' : 'MENUNGGU — Sedang Diproses';
+  
+  // Build validation details
+  var validationHtml = '';
+  if (data.validation) {
+    validationHtml += '<div class="vl"><h4>📋 Validasi File</h4>';
+    validationHtml += '<div class="vi ok"><div class="ic">✓</div><div class="tx"><strong>File Valid</strong>Ukuran: ' + (data.validation.file_size / 1024).toFixed(1) + ' KB, Dimensi: ' + data.validation.image_dimensions + '</div></div>';
+    if (data.validation.image_hash) {
+      validationHtml += '<div class="vi ok"><div class="ic">🔐</div><div class="tx"><strong>Image Hash</strong>' + data.validation.image_hash + '</div></div>';
+    }
+    validationHtml += '</div>';
+  }
+  
+  // Build OCR details
+  var ocrHtml = '';
+  if (data.ocr) {
+    ocrHtml += '<div class="vl"><h4>📝 Hasil OCR</h4>';
+    if (data.ocr.matches_form) {
+      ocrHtml += '<div class="vi ok"><div class="ic">✓</div><div class="tx"><strong>Data Cocok</strong>Amount: Rp ' + (data.ocr.extracted_amount || 'N/A') + ', ID: ' + (data.ocr.extracted_transaction_id || 'N/A') + '</div></div>';
+    } else {
+      ocrHtml += '<div class="vi bad"><div class="ic">✗</div><div class="tx"><strong>Data Tidak Cocok</strong>' + (data.ocr.mismatches || []).join('<br>') + '</div></div>';
+    }
+    ocrHtml += '<div class="vi ' + (data.ocr.confidence > 0.7 ? 'ok' : data.ocr.confidence > 0.3 ? 'warn' : 'bad') + '"><div class="ic">' + (data.ocr.confidence > 0.7 ? '✓' : '⚠') + '</div><div class="tx"><strong>Confidence: ' + (data.ocr.confidence * 100).toFixed(1) + '%</strong></div></div>';
+    ocrHtml += '</div>';
+  }
+  
+  // Build image analysis details
+  var imageHtml = '';
+  if (data.image_analysis) {
+    imageHtml += '<div class="vl"><h4>🖼️ Analisis Gambar</h4>';
+    if (data.image_analysis.manipulation_detected) {
+      imageHtml += '<div class="vi bad"><div class="ic">⚠️</div><div class="tx"><strong>Manipulasi Terdeteksi</strong>Level risiko: ' + data.image_analysis.risk_level + '</div></div>';
+    } else {
+      imageHtml += '<div class="vi ok"><div class="ic">✓</div><div class="tx"><strong>Tidak Ada Manipulasi</strong>Quality score: ' + (data.image_analysis.quality_score * 100).toFixed(1) + '%</div></div>';
+    }
+    if (data.image_analysis.indicators && data.image_analysis.indicators.length > 0) {
+      data.image_analysis.indicators.forEach(function(ind) {
+        imageHtml += '<div class="vi warn"><div class="ic">⚠</div><div class="tx"><strong>Indicator</strong>' + ind + '</div></div>';
+      });
+    }
+    imageHtml += '</div>';
+  }
+  
+  // Build fraud assessment details
+  var fraudHtml = '';
+  if (data.fraud_assessment) {
+    fraudHtml += '<div class="vl"><h4>🛡️ Penilaian Fraud</h4>';
+    fraudHtml += '<div class="vi ' + (data.fraud_assessment.risk_level === 'LOW' ? 'ok' : data.fraud_assessment.risk_level === 'MEDIUM' ? 'warn' : 'bad') + '">';
+    fraudHtml += '<div class="ic">' + (data.fraud_assessment.risk_level === 'LOW' ? '✓' : '⚠') + '</div>';
+    fraudHtml += '<div class="tx"><strong>Risk Score: ' + data.fraud_assessment.risk_score + '/200</strong>Level: ' + data.fraud_assessment.risk_level + '</div></div>';
+    if (data.fraud_assessment.risk_factors && data.fraud_assessment.risk_factors.length > 0) {
+      data.fraud_assessment.risk_factors.forEach(function(factor) {
+        fraudHtml += '<div class="vi warn"><div class="ic">⚠</div><div class="tx"><strong>Faktor Risiko</strong>' + factor + '</div></div>';
+      });
+    }
+    fraudHtml += '</div>';
+  }
+  
+  ra.innerHTML = '<div class="rc ' + cls + '" style="display:block"><div class="rh"><div class="ri">' + icon + '</div><div><div class="rt">' + title + '</div><div style="font-size:12px;color:var(--muted);margin-top:2px">' + stype + ' — ' + data.message + '</div></div></div></div>' + validationHtml + ocrHtml + imageHtml + fraudHtml;
+  
+  pays.unshift({id: data.payment_id || 'PMT-' + Date.now(), status: status, service_type: stype, created_at: new Date().toISOString()});
+  renderHist(pays);
+  updateStats();
+}
+
+function showError(data) {
+  var ra = document.getElementById('ra');
+  var detail = data.detail || data.message || 'Terjadi kesalahan saat memproses pembayaran.';
+  
+  if (typeof detail === 'object' && detail.error) {
+    detail = detail.error + (detail.message ? '<br>' + detail.message : '') + (detail.risk_factors ? '<br><br>Faktor risiko:<br>- ' + detail.risk_factors.join('<br>- ') : '');
+  }
+  
+  ra.innerHTML = '<div class="rc rj" style="display:block"><div class="rh"><div class="ri">❌</div><div><div class="rt">GAGAL</div></div></div><div class="rd">' + detail + '</div></div>';
+}
+
+function loadHist() {
+  fetch('/payment/my', {headers: {'Authorization': 'Bearer ' + token}})
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(d) {
+      if (d) { pays = d.payments || d || []; renderHist(pays); updateStats(); }
+    }).catch(function() { renderHist(pays); });
+}
+
+function renderHist(list) {
+  var area = document.getElementById('ht');
+  var darea = document.getElementById('d-recent');
+  if (!list || list.length === 0) {
+    var empty = '<div class="es"><div style="font-size:48px;margin-bottom:16px">📋</div><div style="font-size:16px;font-weight:600;color:var(--text)">Belum ada riwayat</div></div>';
+    area.innerHTML = empty;
+    darea.innerHTML = empty;
+    return;
+  }
+  var rows = list.slice(0, 20).map(function(p) {
+    var date = new Date(p.created_at).toLocaleDateString('id-ID', {day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    var s = p.status || 'PENDING';
+    var bc = s === 'APPROVED' || s === 'AUTO_APPROVED' ? 'ba' : s === 'REJECTED' || s === 'FLAGGED' ? 'br' : 'bw';
+    var lb = s === 'APPROVED' || s === 'AUTO_APPROVED' ? 'Aman' : s === 'REJECTED' || s === 'FLAGGED' ? 'Mencurigakan' : 'Menunggu';
+    return '<tr><td style="font-family:monospace;font-size:12px;color:var(--muted)">' + (p.id||'').toString().substring(0,14) + '</td><td>' + (p.service_type||'—') + '</td><td><span class="badge ' + bc + '">' + lb + '</span></td><td style="color:var(--muted)">' + date + '</td></tr>';
+  }).join('');
+  var tbl = '<table><thead><tr><th>ID</th><th>Layanan</th><th>Status</th><th>Tanggal</th></tr></thead><tbody>' + rows + '</tbody></table>';
+  area.innerHTML = tbl;
+  darea.innerHTML = tbl;
+}
+
+function updateStats() {
+  document.getElementById('s-total').textContent = pays.length;
+  document.getElementById('s-ok').textContent = pays.filter(function(p){return p.status==='APPROVED'||p.status==='AUTO_APPROVED';}).length;
+  document.getElementById('s-bad').textContent = pays.filter(function(p){return p.status==='REJECTED'||p.status==='FLAGGED';}).length;
+}
+
+function loadCredits() {
+  fetch('/payment/credits', {headers: {'Authorization': 'Bearer ' + token}})
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(d) { if (d) document.getElementById('cr').textContent = d.credits || d.balance || '100'; })
+    .catch(function(){});
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,242 @@
+[
+  {
+    "bank_name": "Bank Central Asia",
+    "provider": "BCA",
+    "amount_patterns": [
+      "Rp[\\s\\.]*(\\d+[\\.\\d]*)",
+      "Jumlah[\\s:]+Rp[\\s]*(\\d+[\\.\\d]*)",
+      "Total[\\s:]+Rp[\\s]*(\\d+[\\.\\d]*)"
+    ],
+    "transaction_id_patterns": [
+      "TRX[\\s:]*([A-Z0-9]+)",
+      "No\\.\\s*Transaksi[\\s:]*([A-Z0-9]+)",
+      "Reference[\\s:]*([A-Z0-9]+)"
+    ],
+    "date_patterns": [
+      "(\\d{2}/\\d{2}/\\d{4}\\s+\\d{2}:\\d{2}:\\d{2})",
+      "(\\d{2}-\\d{2}-\\d{4}\\s+\\d{2}:\\d{2}:\\d{2})"
+    ],
+    "typical_colors": ["#00529F", "#00A3E0", "#FFFFFF"],
+    "logo_position": "top-center",
+    "has_qr_code": true,
+    "has_watermark": true,
+    "font_family": "Arial",
+    "font_sizes": [12, 14, 16, 18, 24],
+    "width_pixels": 720,
+    "height_pixels": 1280,
+    "aspect_ratio": 0.56,
+    "sample_count": 0,
+    "confidence_score": 0.5,
+    "last_updated": null
+  },
+  {
+    "bank_name": "Bank Rakyat Indonesia",
+    "provider": "BRI",
+    "amount_patterns": [
+      "Rp[\\s\\.]*(\\d+[\\.\\d]*)",
+      "Nominal[\\s:]+Rp[\\s]*(\\d+[\\.\\d]*)",
+      "Jumlah[\\s:]+Rp[\\s]*(\\d+[\\.\\d]*)"
+    ],
+    "transaction_id_patterns": [
+      "TRX[\\s:]*([A-Z0-9]+)",
+      "No\\.\\s*Referensi[\\s:]*([A-Z0-9]+)",
+      "Kode[\\s:]*([A-Z0-9]+)"
+    ],
+    "date_patterns": [
+      "(\\d{2}/\\d{2}/\\d{4}\\s+\\d{2}:\\d{2}:\\d{2})",
+      "(\\d{2}-\\d{2}-\\d{4}\\s+\\d{2}:\\d{2}:\\d{2})"
+    ],
+    "typical_colors": ["#006EB5", "#E3000B", "#FFFFFF"],
+    "logo_position": "top-left",
+    "has_qr_code": true,
+    "has_watermark": false,
+    "font_family": "Roboto",
+    "font_sizes": [11, 13, 15, 20],
+    "width_pixels": 720,
+    "height_pixels": 1280,
+    "aspect_ratio": 0.56,
+    "sample_count": 0,
+    "confidence_score": 0.5,
+    "last_updated": null
+  },
+  {
+    "bank_name": "Bank Negara Indonesia",
+    "provider": "BNI",
+    "amount_patterns": [
+      "Rp[\\s\\.]*(\\d+[\\.\\d]*)",
+      "Nilai[\\s:]+Transaksi[\\s:]+Rp[\\s]*(\\d+[\\.\\d]*)",
+      "Total[\\s:]+Rp[\\s]*(\\d+[\\.\\d]*)"
+    ],
+    "transaction_id_patterns": [
+      "TRX[\\s:]*([A-Z0-9]+)",
+      "No\\.\\s*Transaksi[\\s:]*([A-Z0-9]+)",
+      "ID[\\s:]*([A-Z0-9]+)"
+    ],
+    "date_patterns": [
+      "(\\d{2}/\\d{2}/\\d{4}\\s+\\d{2}:\\d{2}:\\d{2})",
+      "(\\d{2}-\\d{2}-\\d{4}\\s+\\d{2}:\\d{2}:\\d{2})"
+    ],
+    "typical_colors": ["#E3000B", "#FFFFFF", "#000000"],
+    "logo_position": "top-center",
+    "has_qr_code": true,
+    "has_watermark": true,
+    "font_family": "Open Sans",
+    "font_sizes": [12, 14, 16, 22],
+    "width_pixels": 720,
+    "height_pixels": 1280,
+    "aspect_ratio": 0.56,
+    "sample_count": 0,
+    "confidence_score": 0.5,
+    "last_updated": null
+  },
+  {
+    "bank_name": "Bank Mandiri",
+    "provider": "MANDIRI",
+    "amount_patterns": [
+      "Rp[\\s\\.]*(\\d+[\\.\\d]*)",
+      "Jumlah[\\s:]+Rp[\\s]*(\\d+[\\.\\d]*)",
+      "Total[\\s:]+Rp[\\s]*(\\d+[\\.\\d]*)"
+    ],
+    "transaction_id_patterns": [
+      "TRX[\\s:]*([A-Z0-9]+)",
+      "No\\.\\s*Urut[\\s:]*([A-Z0-9]+)",
+      "Reference[\\s:]*([A-Z0-9]+)"
+    ],
+    "date_patterns": [
+      "(\\d{2}/\\d{2}/\\d{4}\\s+\\d{2}:\\d{2}:\\d{2})",
+      "(\\d{2}-\\d{2}-\\d{4}\\s+\\d{2}:\\d{2}:\\d{2})"
+    ],
+    "typical_colors": ["#009FE3", "#FFFFFF", "#FFB81C"],
+    "logo_position": "top-center",
+    "has_qr_code": true,
+    "has_watermark": true,
+    "font_family": "Mandiri Sans",
+    "font_sizes": [12, 14, 16, 20],
+    "width_pixels": 720,
+    "height_pixels": 1280,
+    "aspect_ratio": 0.56,
+    "sample_count": 0,
+    "confidence_score": 0.5,
+    "last_updated": null
+  },
+  {
+    "bank_name": "GoPay",
+    "provider": "GOPAY",
+    "amount_patterns": [
+      "Rp[\\s\\.]*(\\d+[\\.\\d]*)",
+      "Total[\\s:]+Rp[\\s]*(\\d+[\\.\\d]*)",
+      "Nilai[\\s:]+Transaksi[\\s:]+Rp[\\s]*(\\d+[\\.\\d]*)"
+    ],
+    "transaction_id_patterns": [
+      "Order[\\s:]*ID[\\s:]*([A-Z0-9]+)",
+      "TRX[\\s:]*([A-Z0-9]+)",
+      "Reference[\\s:]*([A-Z0-9]+)"
+    ],
+    "date_patterns": [
+      "(\\d{2}\\s+(Jan|Feb|Mar|Apr|Mei|Jun|Jul|Agu|Sep|Okt|Nov|Des)\\s+\\d{4},\\s+\\d{2}:\\d{2})",
+      "(\\d{2}/\\d{2}/\\d{4}\\s+\\d{2}:\\d{2})"
+    ],
+    "typical_colors": ["#00AA13", "#FFFFFF"],
+    "logo_position": "top-center",
+    "has_qr_code": true,
+    "has_watermark": false,
+    "font_family": "Gotham",
+    "font_sizes": [14, 16, 18, 24],
+    "width_pixels": 750,
+    "height_pixels": 1334,
+    "aspect_ratio": 0.56,
+    "sample_count": 0,
+    "confidence_score": 0.5,
+    "last_updated": null
+  },
+  {
+    "bank_name": "OVO",
+    "provider": "OVO",
+    "amount_patterns": [
+      "Rp[\\s\\.]*(\\d+[\\.\\d]*)",
+      "Total[\\s:]+Rp[\\s]*(\\d+[\\.\\d]*)",
+      "Jumlah[\\s:]+Rp[\\s]*(\\d+[\\.\\d]*)"
+    ],
+    "transaction_id_patterns": [
+      "TRX[\\s:]*([A-Z0-9]+)",
+      "Order[\\s:]*ID[\\s:]*([A-Z0-9]+)",
+      "Reference[\\s:]*([A-Z0-9]+)"
+    ],
+    "date_patterns": [
+      "(\\d{2}\\s+(Jan|Feb|Mar|Apr|Mei|Jun|Jul|Agu|Sep|Okt|Nov|Des)\\s+\\d{4})",
+      "(\\d{2}/\\d{2}/\\d{4}\\s+\\d{2}:\\d{2})"
+    ],
+    "typical_colors": ["#4C3494", "#FFFFFF", "#6FCF97"],
+    "logo_position": "top-center",
+    "has_qr_code": true,
+    "has_watermark": false,
+    "font_family": "OVO Sans",
+    "font_sizes": [13, 15, 17, 22],
+    "width_pixels": 750,
+    "height_pixels": 1334,
+    "aspect_ratio": 0.56,
+    "sample_count": 0,
+    "confidence_score": 0.5,
+    "last_updated": null
+  },
+  {
+    "bank_name": "DANA",
+    "provider": "DANA",
+    "amount_patterns": [
+      "Rp[\\s\\.]*(\\d+[\\.\\d]*)",
+      "Total[\\s:]+Rp[\\s]*(\\d+[\\.\\d]*)",
+      "Nominal[\\s:]+Rp[\\s]*(\\d+[\\.\\d]*)"
+    ],
+    "transaction_id_patterns": [
+      "TRX[\\s:]*([A-Z0-9]+)",
+      "Order[\\s:]*ID[\\s:]*([A-Z0-9]+)",
+      "No\\.\\s*Transaksi[\\s:]*([A-Z0-9]+)"
+    ],
+    "date_patterns": [
+      "(\\d{2}/\\d{2}/\\d{4}\\s+\\d{2}:\\d{2})",
+      "(\\d{2}-\\d{2}-\\d{4}\\s+\\d{2}:\\d{2})"
+    ],
+    "typical_colors": ["#118EEA", "#FFFFFF"],
+    "logo_position": "top-center",
+    "has_qr_code": true,
+    "has_watermark": false,
+    "font_family": "DANA Sans",
+    "font_sizes": [12, 14, 16, 20],
+    "width_pixels": 750,
+    "height_pixels": 1334,
+    "aspect_ratio": 0.56,
+    "sample_count": 0,
+    "confidence_score": 0.5,
+    "last_updated": null
+  },
+  {
+    "bank_name": "LinkAja",
+    "provider": "LINKAJA",
+    "amount_patterns": [
+      "Rp[\\s\\.]*(\\d+[\\.\\d]*)",
+      "Total[\\s:]+Rp[\\s]*(\\d+[\\.\\d]*)",
+      "Jumlah[\\s:]+Rp[\\s]*(\\d+[\\.\\d]*)"
+    ],
+    "transaction_id_patterns": [
+      "TRX[\\s:]*([A-Z0-9]+)",
+      "Order[\\s:]*ID[\\s:]*([A-Z0-9]+)",
+      "No\\.\\s*Transaksi[\\s:]*([A-Z0-9]+)"
+    ],
+    "date_patterns": [
+      "(\\d{2}/\\d{2}/\\d{4}\\s+\\d{2}:\\d{2})",
+      "(\\d{2}-\\d{2}-\\d{4}\\s+\\d{2}:\\d{2})"
+    ],
+    "typical_colors": ["#E3000B", "#FFFFFF"],
+    "logo_position": "top-center",
+    "has_qr_code": true,
+    "has_watermark": false,
+    "font_family": "LinkAja Sans",
+    "font_sizes": [12, 14, 16, 20],
+    "width_pixels": 750,
+    "height_pixels": 1334,
+    "aspect_ratio": 0.56,
+    "sample_count": 0,
+    "confidence_score": 0.5,
+    "last_updated": null
+  }
+]

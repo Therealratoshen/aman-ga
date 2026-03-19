@@ -19,12 +19,26 @@ CREATE TABLE payment_proofs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     service_type TEXT CHECK (service_type IN ('CEK_DASAR', 'CEK_DEEP', 'CEK_PLUS', 'WALLET_TOPUP')),
-    amount INTEGER NOT NULL,
-    payment_method TEXT CHECK (payment_method IN ('BANK_TRANSFER', 'GOPAY', 'OVO', 'DANA')),
-    bank_name TEXT,
-    transaction_id TEXT,
-    transaction_date TIMESTAMP WITH TIME ZONE,
+    amount INTEGER NOT NULL CHECK (amount >= 100 AND amount <= 100000000),
+    payment_method TEXT CHECK (payment_method IN ('BANK_TRANSFER', 'GOPAY', 'OVO', 'DANA', 'LINKAJA')),
+    bank_name TEXT CHECK (bank_name IN ('BCA', 'BRI', 'BNI', 'MANDIRI', 'PERMATA', 'DANAMON', 'CIMB', 'MAYBANK', 'BTN', 'OTHER')),
+    transaction_id TEXT NOT NULL CHECK (LENGTH(transaction_id) >= 5 AND LENGTH(transaction_id) <= 50),
+    transaction_date TIMESTAMP WITH TIME ZONE NOT NULL,
     proof_image_url TEXT NOT NULL,
+    proof_image_hash TEXT,
+    proof_image_metadata JSONB,
+    ocr_extracted_amount INTEGER,
+    ocr_extracted_transaction_id TEXT,
+    ocr_extracted_date TIMESTAMP WITH TIME ZONE,
+    ocr_extracted_bank TEXT,
+    ocr_confidence_score DECIMAL(3,2) CHECK (ocr_confidence_score >= 0 AND ocr_confidence_score <= 1),
+    ocr_matches_form BOOLEAN DEFAULT FALSE,
+    ocr_mismatches JSONB,
+    image_manipulation_detected BOOLEAN DEFAULT FALSE,
+    image_risk_level TEXT CHECK (image_risk_level IN ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL', 'UNKNOWN')),
+    image_quality_score DECIMAL(3,2),
+    fraud_risk_score INTEGER CHECK (fraud_risk_score >= 0 AND fraud_risk_score <= 200),
+    fraud_risk_factors JSONB,
     status TEXT CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED', 'AUTO_APPROVED', 'FLAGGED')) DEFAULT 'PENDING',
     verification_notes TEXT,
     verified_by UUID REFERENCES users(id),
@@ -73,14 +87,51 @@ CREATE TABLE admin_audit_log (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- OCR Feedback Table (for self-learning)
+CREATE TABLE ocr_feedback (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    payment_proof_id UUID REFERENCES payment_proofs(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    feedback_type TEXT CHECK (feedback_type IN ('CORRECTION', 'CONFIRMATION', 'FLAG')),
+    corrected_amount INTEGER,
+    corrected_transaction_id TEXT,
+    corrected_date TEXT,
+    corrected_bank TEXT,
+    corrected_fields JSONB,
+    notes TEXT,
+    is_legitimate_receipt BOOLEAN,
+    quality_rating INTEGER CHECK (quality_rating >= 1 AND quality_rating <= 5),
+    would_recommend BOOLEAN,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Receipt Format Suggestions Table
+CREATE TABLE receipt_format_suggestions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    provider TEXT NOT NULL,
+    suggested_by UUID REFERENCES users(id),
+    suggested_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    feedback JSONB,
+    status TEXT CHECK (status IN ('PENDING', 'REVIEWED', 'IMPLEMENTED', 'REJECTED')) DEFAULT 'PENDING',
+    reviewed_by UUID REFERENCES users(id),
+    reviewed_at TIMESTAMP WITH TIME ZONE
+);
+
 -- Indexes
 CREATE INDEX idx_payment_proofs_user ON payment_proofs(user_id);
 CREATE INDEX idx_payment_proofs_status ON payment_proofs(status);
 CREATE INDEX idx_service_credits_user ON service_credits(user_id);
 CREATE INDEX idx_fraud_flags_user ON fraud_flags(user_id);
+CREATE INDEX idx_ocr_feedback_payment ON ocr_feedback(payment_proof_id);
+CREATE INDEX idx_ocr_feedback_type ON ocr_feedback(feedback_type);
+
+-- Add new columns to existing tables (for migration)
+-- ALTER TABLE payment_proofs ADD COLUMN IF NOT EXISTS proof_image_hash TEXT;
+-- ALTER TABLE payment_proofs ADD COLUMN IF NOT EXISTS ocr_extracted_amount INTEGER;
+-- (etc. - see full schema above)
 
 -- Create admin user (password: admin123)
-INSERT INTO users (email, password_hash, role, full_name) 
+INSERT INTO users (email, password_hash, role, full_name)
 VALUES (
     'admin@amanga.id',
     '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYzS3MebAJu',

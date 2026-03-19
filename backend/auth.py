@@ -5,8 +5,11 @@ from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from database import supabase, get_db
+import os
 
-SECRET_KEY = "your-secret-key-change-in-production"
+# Load SECRET_KEY from environment variable
+# IMPORTANT: Set this in production! Generate with: openssl rand -hex 32
+SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-in-production")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 

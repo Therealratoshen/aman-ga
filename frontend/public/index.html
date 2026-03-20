@@ -196,6 +196,98 @@ tr:hover{background:var(--bg)}
 .confidence-fill.high{background:var(--green)}
 .confidence-fill.medium{background:var(--orange)}
 .confidence-fill.low{background:var(--red)}
+
+/* Admin Dashboard Styles */
+.dashboard-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4edf9 100%);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.status-grid, .metrics-grid, .authenticity-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin: 15px 0;
+}
+
+.status-card, .metric-card, .auth-card {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.status-number, .metric-number, .auth-number {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2563eb;
+  margin-top: 5px;
+}
+
+.authenticity-grid {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.trigger-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin: 5px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.trigger-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+.provider-list {
+  margin-top: 15px;
+}
+
+.provider-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.formats-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.formats-table th, .formats-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.formats-table th {
+  background-color: #f8fafc;
+  font-weight: 600;
+}
+
+.formats-table button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.formats-table button:hover {
+  background: #2563eb;
+}
 </style>
 </head>
 <body>
@@ -520,6 +612,38 @@ tr:hover{background:var(--bg)}
             </table>
           </div>
         </div>
+      </div>
+    </div>
+    
+    <!-- Admin Dashboard Section -->
+    <div id="admin-dashboard" style="display:none; padding: 20px; margin-top: 20px;">
+      <h2>Admin Dashboard - System Monitoring</h2>
+      
+      <div class="dashboard-section">
+        <h3>System Status</h3>
+        <div id="system-status"></div>
+      </div>
+      
+      <div class="dashboard-section">
+        <h3>Learning Metrics</h3>
+        <div id="learning-metrics"></div>
+      </div>
+      
+      <div class="dashboard-section">
+        <h3>Authenticity Metrics</h3>
+        <div id="authenticity-metrics"></div>
+      </div>
+      
+      <div class="dashboard-section">
+        <h3>Manual Learning Triggers</h3>
+        <button onclick="triggerLearningCycle('daily')" class="trigger-btn">Run Daily Learning</button>
+        <button onclick="triggerLearningCycle('weekly')" class="trigger-btn">Run Weekly Learning</button>
+        <button onclick="triggerLearningCycle('monthly')" class="trigger-btn">Run Monthly Learning</button>
+      </div>
+      
+      <div class="dashboard-section">
+        <h3>Receipt Format Management</h3>
+        <div id="format-management"></div>
       </div>
     </div>
   </div>
@@ -1129,6 +1253,243 @@ async function submitFeedback() {
     alert('❌ Terjadi kesalahan.');
   }
 }
+
+// Admin Dashboard Functions
+async function showAdminDashboard() {
+  const isAdmin = await checkAdminStatus();
+  if (!isAdmin) {
+    alert('Access denied: Admin privileges required');
+    return;
+  }
+  
+  document.getElementById('admin-dashboard').style.display = 'block';
+  loadSystemStatus();
+  loadLearningMetrics();
+  loadAuthenticityMetrics();
+  loadFormatManagement();
+}
+
+async function checkAdminStatus() {
+  try {
+    const res = await fetch('/admin/monitoring/status', {
+      headers: {
+        'Authorization': 'Bearer ' + token
+      }
+    });
+    return res.status === 200;
+  } catch (err) {
+    return false;
+  }
+}
+
+async function loadSystemStatus() {
+  try {
+    const res = await fetch('/admin/monitoring/status', {
+      headers: {
+        'Authorization': 'Bearer ' + token
+      }
+    });
+    const data = await res.json();
+    
+    document.getElementById('system-status').innerHTML = `
+      <div class="status-grid">
+        <div class="status-card">
+          <h4>Total Formats</h4>
+          <div class="status-number">${data.ocr_system.total_formats}</div>
+        </div>
+        <div class="status-card">
+          <h4>Total Feedback</h4>
+          <div class="status-number">${data.ocr_system.total_feedback}</div>
+        </div>
+        <div class="status-card">
+          <h4>Learning Active</h4>
+          <div class="status-number">${data.automatic_learning.is_running ? 'Yes' : 'No'}</div>
+        </div>
+        <div class="status-card">
+          <h4>Scheduled Jobs</h4>
+          <div class="status-number">${data.automatic_learning.scheduled_jobs}</div>
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    console.error('Error loading system status:', err);
+  }
+}
+
+async function loadLearningMetrics() {
+  try {
+    const res = await fetch('/admin/monitoring/metrics', {
+      headers: {
+        'Authorization': 'Bearer ' + token
+      }
+    });
+    const data = await res.json();
+    
+    document.getElementById('learning-metrics').innerHTML = `
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <h4>Corrections</h4>
+          <div class="metric-number">${data.ocr_system.learning_metrics.corrections}</div>
+        </div>
+        <div class="metric-card">
+          <h4>Confirmations</h4>
+          <div class="metric-number">${data.ocr_system.learning_metrics.confirmations}</div>
+        </div>
+        <div class="metric-card">
+          <h4>Authenticity Feedback</h4>
+          <div class="metric-number">${data.ocr_system.learning_metrics.authenticity_feedback}</div>
+        </div>
+        <div class="metric-card">
+          <h4>Authenticity Accuracy</h4>
+          <div class="metric-number">${(data.ocr_system.learning_metrics.authenticity_accuracy * 100).toFixed(1)}%</div>
+        </div>
+      </div>
+      
+      <h4>Feedback by Type</h4>
+      <div class="chart-container">
+        <canvas id="feedbackChart" width="400" height="200"></canvas>
+      </div>
+    `;
+  } catch (err) {
+    console.error('Error loading learning metrics:', err);
+  }
+}
+
+async function loadAuthenticityMetrics() {
+  try {
+    const res = await fetch('/admin/monitoring/authenticity', {
+      headers: {
+        'Authorization': 'Bearer ' + token
+      }
+    });
+    const data = await res.json();
+    
+    document.getElementById('authenticity-metrics').innerHTML = `
+      <div class="authenticity-grid">
+        <div class="auth-card">
+          <h4>Authenticity Rate</h4>
+          <div class="auth-number">${data.authenticity_rate.toFixed(1)}%</div>
+        </div>
+        <div class="auth-card">
+          <h4>Legitimate Receipts</h4>
+          <div class="auth-number">${data.legitimate_count}</div>
+        </div>
+        <div class="auth-card">
+          <h4>Fake Receipts</h4>
+          <div class="auth-number">${data.fake_count}</div>
+        </div>
+        <div class="auth-card">
+          <h4>Total with Auth Info</h4>
+          <div class="auth-number">${data.total_with_auth_info}</div>
+        </div>
+      </div>
+      
+      <h4>By Provider</h4>
+      <div class="provider-list">
+        ${Object.entries(data.by_provider).map(([provider, stats]) => `
+          <div class="provider-item">
+            <span class="provider-name">${provider}</span>
+            <span class="legit-count">Legit: ${stats.legitimate}</span>
+            <span class="fake-count">Fake: ${stats.fake}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } catch (err) {
+    console.error('Error loading authenticity metrics:', err);
+  }
+}
+
+async function loadFormatManagement() {
+  try {
+    const res = await fetch('/admin/formats/list', {
+      headers: {
+        'Authorization': 'Bearer ' + token
+      }
+    });
+    const data = await res.json();
+    
+    document.getElementById('format-management').innerHTML = `
+      <div class="formats-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Provider</th>
+              <th>Bank Name</th>
+              <th>Confidence</th>
+              <th>Authenticity</th>
+              <th>Samples</th>
+              <th>Last Updated</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.formats.map(format => `
+              <tr>
+                <td><strong>${format.provider}</strong></td>
+                <td>${format.bank_name}</td>
+                <td>${(format.confidence_score * 100).toFixed(1)}%</td>
+                <td>${(format.authenticity_score * 100).toFixed(1)}%</td>
+                <td>${format.sample_count}</td>
+                <td>${format.last_updated ? new Date(format.last_updated).toLocaleDateString() : 'N/A'}</td>
+                <td>
+                  <button onclick="editFormat('${format.provider}')">Edit</button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  } catch (err) {
+    console.error('Error loading format management:', err);
+  }
+}
+
+async function triggerLearningCycle(cycleType) {
+  try {
+    const res = await fetch(`/admin/learning/triggers?cycle_type=${cycleType}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + token
+      }
+    });
+    
+    if (res.ok) {
+      const data = await res.json();
+      alert(`✅ ${data.message}`);
+      // Refresh metrics after triggering
+      setTimeout(() => {
+        loadSystemStatus();
+        loadLearningMetrics();
+      }, 2000);
+    } else {
+      alert('❌ Failed to trigger learning cycle');
+    }
+  } catch (err) {
+    alert('❌ Error triggering learning cycle');
+  }
+}
+
+function editFormat(provider) {
+  alert(`Edit functionality for ${provider} would open a modal here`);
+  // In a real implementation, this would open an edit modal
+}
+
+// Add admin button to navigation if user is admin
+window.addEventListener('load', async () => {
+  const isAdmin = await checkAdminStatus();
+  if (isAdmin) {
+    const navContainer = document.querySelector('.nav-links');
+    if (navContainer) {
+      const adminBtn = document.createElement('button');
+      adminBtn.className = 'nav-btn';
+      adminBtn.textContent = '📊 Admin Dashboard';
+      adminBtn.onclick = showAdminDashboard;
+      navContainer.appendChild(adminBtn);
+    }
+  }
+});
 </script>
 </body>
 </html>

@@ -7,6 +7,8 @@ This module handles:
 2. OCR confidence learning from user corrections
 3. Pattern improvement based on feedback
 4. Uncertainty flagging for low-confidence extractions
+5. Authenticity validation based on user feedback history
+6. Integration with automatic scheduled learning system
 """
 
 import json
@@ -46,6 +48,7 @@ class ReceiptFormat:
     # Learning metadata
     sample_count: int = 0
     confidence_score: float = 0.5  # Starts at 0.5, improves with feedback
+    authenticity_score: float = 0.5  # Authenticity based on user feedback
     last_updated: str = None
     
     def __post_init__(self):
@@ -59,27 +62,30 @@ class UserFeedback:
     feedback_id: str
     payment_proof_id: str
     timestamp: str
-    
+
     # Original OCR results
     ocr_extracted_amount: Optional[int]
     ocr_extracted_transaction_id: Optional[str]
     ocr_extracted_date: Optional[str]
     ocr_confidence: float
-    
+
     # User corrections
     user_corrected_amount: Optional[int]
     user_corrected_transaction_id: Optional[str]
     user_corrected_date: Optional[str]
-    
+
     # Feedback type
     feedback_type: str  # CORRECTION, CONFIRMATION, FLAG
-    
+
     # Additional notes
     notes: str = ""
-    
+
     # Was the feedback helpful for learning?
     used_for_learning: bool = False
     learning_impact: float = 0.0
+    
+    # Authenticity information
+    is_legitimate_receipt: Optional[bool] = None
 
 
 @dataclass
@@ -89,21 +95,26 @@ class LearningMetrics:
     total_feedback: int = 0
     corrections: int = 0
     confirmations: int = 0
-    
+    authenticity_feedback: int = 0
+
     # Accuracy by field
     amount_accuracy: float = 0.0
     transaction_id_accuracy: float = 0.0
     date_accuracy: float = 0.0
-    
+
     # Confidence calibration
     avg_confidence: float = 0.0
     confidence_calibration: float = 0.0  # How well confidence matches accuracy
-    
+
+    # Authenticity metrics
+    authenticity_accuracy: float = 0.0
+    fake_receipt_detection_rate: float = 0.0
+
     # By provider
     provider_metrics: Dict[str, Dict] = None
-    
+
     last_updated: str = None
-    
+
     def __post_init__(self):
         if self.last_updated is None:
             self.last_updated = datetime.now().isoformat()
@@ -135,14 +146,16 @@ class SelfLearningOCR:
         # Initialize storage
         self.receipt_formats: Dict[str, ReceiptFormat] = {}
         self.feedback_history: List[UserFeedback] = []
+        self.user_authenticity_history: Dict[str, List[Dict]] = {}  # Track per user
         self.metrics = LearningMetrics()
-        
+
         # Load existing configurations
         self.load_configurations()
-        
+
         # Uncertainty thresholds
         self.HIGH_UNCERTAINTY_THRESHOLD = 0.6  # Below this = flag as uncertain
         self.MEDIUM_UNCERTAINTY_THRESHOLD = 0.8  # Below this = show warning
+        self.AUTHENTICITY_THRESHOLD = 0.7  # Below this = likely fake
         
     def load_configurations(self):
         """Load receipt format configurations from JSON files"""
@@ -446,22 +459,30 @@ class SelfLearningOCR:
     def submit_feedback(self, feedback: UserFeedback):
         """
         Submit user feedback for learning.
-        
+
         This is the core of self-learning - every correction improves the system.
         """
         self.feedback_history.append(feedback)
         self.metrics.total_feedback += 1
-        
+
         if feedback.feedback_type == "CORRECTION":
             self.metrics.corrections += 1
             self._learn_from_correction(feedback)
         elif feedback.feedback_type == "CONFIRMATION":
             self.metrics.confirmations += 1
             self._learn_from_confirmation(feedback)
-        
+
+        # Handle authenticity feedback
+        if feedback.is_legitimate_receipt is not None:
+            self.metrics.authenticity_feedback += 1
+            self._update_authenticity_scores(feedback)
+            
+            # Track user's authenticity feedback for pattern analysis
+            self._track_user_authenticity_pattern(feedback)
+
         # Update metrics
         self._update_metrics()
-        
+
         # Save configurations
         self.save_configurations()
     
@@ -512,9 +533,190 @@ class SelfLearningOCR:
                 self.metrics.total_feedback
             )
         
+        # Calculate authenticity accuracy if we have enough data
+        if self.metrics.authenticity_feedback > 0:
+            # This would require tracking ground truth authenticity
+            # For now, we'll just use the feedback ratio as a proxy
+            legitimate_count = sum(1 for f in self.feedback_history 
+                                 if f.is_legitimate_receipt is True)
+            self.metrics.authenticity_accuracy = legitimate_count / self.metrics.authenticity_feedback
+
         # Update confidence calibration
         # (How well does OCR confidence match actual accuracy?)
         pass
+
+    def _update_authenticity_scores(self, feedback: UserFeedback):
+        """Update authenticity scores based on user feedback"""
+        # Get the provider from the payment proof
+        # In a real implementation, you'd fetch this from the database
+        # For now, we'll extract it from the feedback data
+        provider = self._get_provider_from_payment_id(feedback.payment_proof_id)
+        
+        if provider and provider in self.receipt_formats:
+            format_info = self.receipt_formats[provider]
+            
+            # Update the authenticity score based on user feedback
+            if feedback.is_legitimate_receipt:
+                # Genuine receipt - increase authenticity score slightly
+                format_info.authenticity_score = min(1.0, format_info.authenticity_score + 0.05)
+            else:
+                # Fake receipt - decrease authenticity score
+                format_info.authenticity_score = max(0.0, format_info.authenticity_score - 0.1)
+                
+            format_info.last_updated = datetime.now().isoformat()
+
+    def _get_provider_from_payment_id(self, payment_id: str) -> Optional[str]:
+        """Extract provider from payment ID - placeholder implementation"""
+        # In a real implementation, this would query the database
+        # For now, return None to skip provider-specific updates
+        return None
+
+    def _track_user_authenticity_pattern(self, feedback: UserFeedback):
+        """Track user's authenticity feedback patterns"""
+        # Group feedback by user for pattern analysis
+        user_id = self._get_user_id_from_payment_id(feedback.payment_proof_id)
+        
+        if user_id:
+            if user_id not in self.user_authenticity_history:
+                self.user_authenticity_history[user_id] = []
+                
+            self.user_authenticity_history[user_id].append({
+                'timestamp': feedback.timestamp,
+                'is_legitimate': feedback.is_legitimate_receipt,
+                'payment_id': feedback.payment_proof_id
+            })
+            
+            # Maintain only recent feedback (last 100 entries)
+            if len(self.user_authenticity_history[user_id]) > 100:
+                self.user_authenticity_history[user_id] = self.user_authenticity_history[user_id][-100:]
+
+    def _get_user_id_from_payment_id(self, payment_id: str) -> Optional[str]:
+        """Extract user ID from payment ID - placeholder implementation"""
+        # In a real implementation, this would query the database
+        # For now, return a mock user ID
+        return "mock_user_id"
+
+    def analyze_authenticity(self, payment_id: str, extracted_data: dict, user_id: str = None) -> dict:
+        """
+        Analyze the authenticity of a receipt based on multiple factors
+        """
+        provider = extracted_data.get('bank_name', '').upper()
+        
+        # Get format information if available
+        format_info = self.receipt_formats.get(provider) if provider else None
+        
+        # Calculate base authenticity score
+        base_score = format_info.authenticity_score if format_info else 0.5
+        
+        # Calculate user-specific authenticity score if user_id provided
+        user_score = self._calculate_user_authenticity_score(user_id) if user_id else 0.5
+        
+        # Calculate historical consistency score
+        historical_score = self._calculate_historical_consistency(extracted_data)
+        
+        # Combine scores with weights
+        authenticity_score = (
+            base_score * 0.4 +  # Format-based score
+            user_score * 0.3 +  # User-based score
+            historical_score * 0.3  # Historical consistency score
+        )
+        
+        # Determine if likely authentic
+        is_likely_authentic = authenticity_score >= self.AUTHENTICITY_THRESHOLD
+        
+        return {
+            "authenticity_score": authenticity_score,
+            "is_likely_authentic": is_likely_authentic,
+            "confidence_level": self._get_confidence_level(authenticity_score),
+            "breakdown": {
+                "format_based_score": base_score,
+                "user_based_score": user_score,
+                "historical_consistency_score": historical_score
+            },
+            "recommendation": self._get_authenticity_recommendation(is_likely_authentic, authenticity_score)
+        }
+
+    def _calculate_user_authenticity_score(self, user_id: str) -> float:
+        """
+        Calculate authenticity score based on user's historical feedback patterns
+        """
+        if user_id not in self.user_authenticity_history:
+            # New user - neutral score
+            return 0.5
+        
+        user_feedback = self.user_authenticity_history[user_id]
+        
+        if not user_feedback:
+            return 0.5
+            
+        # Calculate the ratio of legitimate receipts reported by this user
+        legitimate_count = sum(1 for entry in user_feedback if entry['is_legitimate'])
+        total_count = len(user_feedback)
+        
+        if total_count == 0:
+            return 0.5
+            
+        # Calculate user's legitimacy reporting rate
+        user_legitimacy_rate = legitimate_count / total_count
+        
+        # Adjust score based on how often user reports legitimate vs fake receipts
+        # If user frequently reports receipts as fake, lower their score
+        # If user frequently reports receipts as legitimate, adjust accordingly
+        if total_count >= 10:  # Only consider if user has submitted enough feedback
+            # Normalize against expected rate (e.g., 80% legitimate receipts)
+            expected_legitimate_rate = 0.8
+            adjustment = (user_legitimacy_rate - expected_legitimate_rate) * 0.2
+            return max(0.1, min(0.9, 0.5 + adjustment))
+        else:
+            # For users with limited feedback, stick closer to neutral
+            return 0.5
+
+    def _calculate_historical_consistency(self, extracted_data: dict) -> float:
+        """
+        Calculate score based on how consistent the data is with historical patterns
+        """
+        provider = extracted_data.get('bank_name', '').upper()
+        
+        if not provider or provider not in self.receipt_formats:
+            return 0.5  # Neutral score if we don't know the provider
+        
+        format_info = self.receipt_formats[provider]
+        
+        # This would normally compare against historical data from the database
+        # For now, we'll return a score based on format compliance
+        # In a real implementation, you'd query the database for similar transactions
+        
+        # Placeholder: return score based on format compliance
+        # In reality, you'd compare against historical data patterns
+        return format_info.confidence_score
+
+    def _get_confidence_level(self, score: float) -> str:
+        """Convert authenticity score to confidence level"""
+        if score >= 0.8:
+            return "VERY_HIGH"
+        elif score >= 0.6:
+            return "HIGH"
+        elif score >= 0.4:
+            return "MEDIUM"
+        elif score >= 0.2:
+            return "LOW"
+        else:
+            return "VERY_LOW"
+
+    def _get_authenticity_recommendation(self, is_likely_authentic: bool, score: float) -> str:
+        """Get recommendation based on authenticity score"""
+        if is_likely_authentic:
+            if score >= 0.9:
+                return "Receipt appears highly authentic, auto-approve"
+            elif score >= 0.7:
+                return "Receipt appears authentic, minimal review needed"
+            else:
+                return "Receipt likely authentic, quick verification recommended"
+        else:
+            if score <= 0.3:
+                return "Receipt appears fake, reject immediately"
+            else:
+                return "Receipt questionable, manual review required"
     
     def add_receipt_format(self, format_data: ReceiptFormat):
         """Add or update a receipt format configuration"""
@@ -575,3 +777,16 @@ class SelfLearningOCR:
 
 # Initialize global instance
 self_learning_ocr = SelfLearningOCR()
+
+# Import and start automatic learning system
+try:
+    from automatic_learning import automatic_learning_system
+    # Start the automatic learning system
+    automatic_learning_system.ocr_system = self_learning_ocr
+except ImportError:
+    import sys
+    import os
+    sys.path.append(os.path.dirname(__file__))
+    from automatic_learning import automatic_learning_system
+    # Start the automatic learning system
+    automatic_learning_system.ocr_system = self_learning_ocr

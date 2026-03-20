@@ -11,6 +11,7 @@ from validators import PaymentValidator, FileValidationResult, OCRResult, ImageA
 from rate_limiter import RateLimiter, upload_limit, get_client_ip, check_ip_blocked
 from ocr_learning import SelfLearningOCR, UserFeedback, LearningMetrics
 from feedback_models import UserFeedbackCreate, OCRUncertaintyReport, LearningMetricsResponse, ReceiptFormatInfo
+from admin_api import router as admin_router
 from datetime import datetime, timedelta
 from typing import Optional, List
 import aiofiles
@@ -26,6 +27,14 @@ rate_limiter.setup_app(app)
 
 # Initialize self-learning OCR
 self_learning_ocr = SelfLearningOCR()
+
+# Start automatic learning system
+try:
+    from automatic_learning import start_automatic_learning
+    start_automatic_learning()
+    print("✅ Automatic learning system started")
+except Exception as e:
+    print(f"⚠️ Failed to start automatic learning system: {e}")
 
 # CORS - Hardened configuration
 app.add_middleware(
@@ -48,6 +57,9 @@ payment_service = PaymentService()
 fraud_service = FraudService()
 notification_service = NotificationService()
 validator = PaymentValidator()
+
+# Include admin API routes
+app.include_router(admin_router)
 
 # Security headers middleware
 @app.middleware("http")
@@ -225,12 +237,13 @@ async def upload_payment_proof(
         **payment_data,
         "proof_image_hash": file_validation.image_hash
     }
-    
+
     fraud_check = fraud_service.calculate_risk_score(
-        current_user["id"], 
+        current_user["id"],
         fraud_check_data,
         image_analysis=image_analysis.__dict__,
-        ocr_result=ocr_result.__dict__
+        ocr_result=ocr_result.__dict__,
+        authenticity_result=authenticity_result
     )
     
     # Block critical risk uploads
@@ -243,14 +256,28 @@ async def upload_payment_proof(
             "CRITICAL"
         )
         raise HTTPException(
-            status_code=400, 
+            status_code=400,
             detail={
                 "error": "Payment flagged for critical risk",
                 "risk_factors": fraud_check["risk_factors"],
                 "message": "This payment has been flagged for manual review due to high risk indicators"
             }
         )
+
+    # Step 6.5: Analyze receipt authenticity based on user feedback patterns
+    extracted_data = {
+        "bank_name": validated_data.bank_name.value,
+        "amount": validated_data.amount,
+        "transaction_id": validated_data.transaction_id,
+        "transaction_date": validated_data.transaction_date
+    }
     
+    authenticity_result = self_learning_ocr.analyze_authenticity(
+        "",  # payment_id not created yet
+        extracted_data,
+        current_user["id"]
+    )
+
     # Step 7: Create payment proof with all validation data
     proof_data = {
         "service_type": validated_data.service_type.value,
@@ -267,7 +294,10 @@ async def upload_payment_proof(
         "image_manipulation_detected": image_analysis.is_manipulated,
         "image_risk_level": image_analysis.risk_level,
         "fraud_risk_score": fraud_check["risk_score"],
-        "fraud_risk_factors": fraud_check["risk_factors"]
+        "fraud_risk_factors": fraud_check["risk_factors"],
+        "authenticity_score": authenticity_result["authenticity_score"],
+        "is_likely_authentic": authenticity_result["is_likely_authentic"],
+        "authenticity_breakdown": authenticity_result["breakdown"]
     }
     
     result = payment_service.create_payment_proof(current_user["id"], proof_data)
@@ -310,6 +340,13 @@ async def upload_payment_proof(
             "quality_score": round(image_analysis.quality_score * 100, 1),
             "indicators": image_analysis.manipulation_indicators
         },
+        "authenticity_assessment": {
+            "authenticity_score": round(authenticity_result["authenticity_score"] * 100, 1),
+            "is_likely_authentic": authenticity_result["is_likely_authentic"],
+            "confidence_level": authenticity_result["confidence_level"],
+            "breakdown": authenticity_result["breakdown"],
+            "recommendation": authenticity_result["recommendation"]
+        },
         "fraud_assessment": {
             "risk_score": fraud_check["risk_score"],
             "risk_level": fraud_check["risk_level"],
@@ -317,7 +354,7 @@ async def upload_payment_proof(
             "requires_manual_review": fraud_check["requires_manual_review"]
         }
     }
-    
+
     return response
 
 @app.get("/payment/my", tags=["Payment"])
@@ -574,22 +611,31 @@ async def submit_feedback(
     Every correction makes the system smarter!
     """
     
+    # Fetch original payment proof to get OCR data
+    payment_proof = supabase.table("payment_proofs").select("*").eq("id", feedback_data.payment_proof_id).execute()
+    
+    if not payment_proof.data:
+        raise HTTPException(status_code=404, detail="Payment proof not found")
+    
+    original_proof = payment_proof.data[0]
+    
     # Create feedback record
     feedback = UserFeedback(
         feedback_id=feedback_data.generate_id(),
         payment_proof_id=feedback_data.payment_proof_id,
         timestamp=feedback_data.generate_timestamp(),
-        ocr_extracted_amount=None,  # Would fetch from payment proof
-        ocr_extracted_transaction_id=None,
-        ocr_extracted_date=None,
-        ocr_confidence=0.0,
+        ocr_extracted_amount=original_proof.get("ocr_extracted_amount"),
+        ocr_extracted_transaction_id=original_proof.get("ocr_extracted_transaction_id"),
+        ocr_extracted_date=original_proof.get("ocr_extracted_date"),
+        ocr_confidence=original_proof.get("ocr_confidence", 0.0),
         user_corrected_amount=feedback_data.corrected_amount,
         user_corrected_transaction_id=feedback_data.corrected_transaction_id,
         user_corrected_date=feedback_data.corrected_date,
         feedback_type=feedback_data.feedback_type.value,
         notes=feedback_data.notes,
         used_for_learning=False,
-        learning_impact=0.0
+        learning_impact=0.0,
+        is_legitimate_receipt=feedback_data.is_legitimate_receipt
     )
     
     # Submit to self-learning system

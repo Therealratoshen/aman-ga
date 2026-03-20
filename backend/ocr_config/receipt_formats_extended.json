@@ -38,7 +38,7 @@
     "sample_count": 0,
     "confidence_score": 0.5,
     "authenticity_score": 0.5,
-    "last_updated": "2026-03-20T15:51:25.867859"
+    "last_updated": null
   },
   {
     "bank_name": "Bank Rakyat Indonesia",
@@ -78,7 +78,7 @@
     "sample_count": 0,
     "confidence_score": 0.5,
     "authenticity_score": 0.5,
-    "last_updated": "2026-03-20T15:51:25.867864"
+    "last_updated": null
   },
   {
     "bank_name": "Bank Negara Indonesia",
@@ -118,7 +118,7 @@
     "sample_count": 0,
     "confidence_score": 0.5,
     "authenticity_score": 0.5,
-    "last_updated": "2026-03-20T15:51:25.867867"
+    "last_updated": null
   },
   {
     "bank_name": "Bank Mandiri",
@@ -158,7 +158,7 @@
     "sample_count": 0,
     "confidence_score": 0.5,
     "authenticity_score": 0.5,
-    "last_updated": "2026-03-20T15:51:25.867870"
+    "last_updated": null
   },
   {
     "bank_name": "GoPay",
@@ -197,7 +197,7 @@
     "sample_count": 0,
     "confidence_score": 0.5,
     "authenticity_score": 0.5,
-    "last_updated": "2026-03-20T15:51:25.867873"
+    "last_updated": null
   },
   {
     "bank_name": "OVO",
@@ -237,7 +237,7 @@
     "sample_count": 0,
     "confidence_score": 0.5,
     "authenticity_score": 0.5,
-    "last_updated": "2026-03-20T15:51:25.867876"
+    "last_updated": null
   },
   {
     "bank_name": "DANA",
@@ -276,7 +276,7 @@
     "sample_count": 0,
     "confidence_score": 0.5,
     "authenticity_score": 0.5,
-    "last_updated": "2026-03-20T15:51:25.867879"
+    "last_updated": null
   },
   {
     "bank_name": "LinkAja",
@@ -315,7 +315,7 @@
     "sample_count": 0,
     "confidence_score": 0.5,
     "authenticity_score": 0.5,
-    "last_updated": "2026-03-20T15:51:25.867881"
+    "last_updated": null
   },
   {
     "bank_name": "Alfamart",
@@ -356,7 +356,7 @@
     "sample_count": 0,
     "confidence_score": 0.5,
     "authenticity_score": 0.5,
-    "last_updated": "2026-03-20T15:51:25.867884"
+    "last_updated": null
   },
   {
     "bank_name": "Indomaret",
@@ -397,7 +397,7 @@
     "sample_count": 0,
     "confidence_score": 0.5,
     "authenticity_score": 0.5,
-    "last_updated": "2026-03-20T15:51:25.867888"
+    "last_updated": null
   },
   {
     "bank_name": "Supermarket Giant",
@@ -438,7 +438,7 @@
     "sample_count": 0,
     "confidence_score": 0.5,
     "authenticity_score": 0.5,
-    "last_updated": "2026-03-20T15:51:25.867891"
+    "last_updated": null
   },
   {
     "bank_name": "Lotte Mart",
@@ -479,7 +479,7 @@
     "sample_count": 0,
     "confidence_score": 0.5,
     "authenticity_score": 0.5,
-    "last_updated": "2026-03-20T15:51:25.867894"
+    "last_updated": null
   },
   {
     "bank_name": "Carefour",
@@ -520,7 +520,7 @@
     "sample_count": 0,
     "confidence_score": 0.5,
     "authenticity_score": 0.5,
-    "last_updated": "2026-03-20T15:51:25.867896"
+    "last_updated": null
   },
   {
     "bank_name": "Transmart",
@@ -561,7 +561,7 @@
     "sample_count": 0,
     "confidence_score": 0.5,
     "authenticity_score": 0.5,
-    "last_updated": "2026-03-20T15:51:25.867899"
+    "last_updated": null
   },
   {
     "bank_name": "Matahari Department Store",
@@ -602,7 +602,7 @@
     "sample_count": 0,
     "confidence_score": 0.5,
     "authenticity_score": 0.5,
-    "last_updated": "2026-03-20T15:51:25.867902"
+    "last_updated": null
   },
   {
     "bank_name": "Electronic City",
@@ -643,7 +643,7 @@
     "sample_count": 0,
     "confidence_score": 0.5,
     "authenticity_score": 0.5,
-    "last_updated": "2026-03-20T15:51:25.867905"
+    "last_updated": null
   },
   {
     "bank_name": "Best Denki",
@@ -684,6 +684,6 @@
     "sample_count": 0,
     "confidence_score": 0.5,
     "authenticity_score": 0.5,
-    "last_updated": "2026-03-20T15:51:25.867908"
+    "last_updated": null
   }
 ]

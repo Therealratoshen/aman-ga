@@ -31,6 +31,9 @@ class PaymentMethod(str, Enum):
     OVO = "OVO"
     DANA = "DANA"
     LINKAJA = "LINKAJA"
+    CASH = "CASH"
+    CREDIT_CARD = "CREDIT_CARD"
+    DEBIT_CARD = "DEBIT_CARD"
 
 
 class BankName(str, Enum):
@@ -44,6 +47,15 @@ class BankName(str, Enum):
     MAYBANK = "MAYBANK"
     BTN = "BTN"
     OTHER = "OTHER"
+    ALFAMART = "ALFAMART"
+    INDOMARET = "INDOMARET"
+    GIANT = "GIANT"
+    LOTTE = "LOTTE"
+    CARREFOUR = "CARREFOUR"
+    TRANSMART = "TRANSMART"
+    MATAHARI = "MATAHARI"
+    ELECTRICCITY = "ELECTRICCITY"
+    BESTDENKI = "BESTDENKI"
 
 
 class PaymentProofCreate(BaseModel):
@@ -346,11 +358,19 @@ class PaymentValidator:
     def _extract_bank(self, text: str) -> Optional[str]:
         """Extract bank name from OCR text"""
         banks = ['BCA', 'BRI', 'BNI', 'MANDIRI', 'PERMATA', 'DANAMON', 'CIMB', 'MAYBANK', 'BTN']
+        retail_stores = ['ALFAMART', 'INDOMARET', 'GIANT', 'LOTTE', 'CARREFOUR', 'TRANSMART', 'MATAHARI', 'ELECTRICCITY', 'BESTDENKI']
         text_upper = text.upper()
-        
+
+        # Check for banks first
         for bank in banks:
             if bank in text_upper:
                 return bank
+                
+        # Then check for retail stores
+        for store in retail_stores:
+            if store in text_upper:
+                return store
+                
         return None
     
     def analyze_image(self, image_content: bytes) -> ImageAnalysisResult:

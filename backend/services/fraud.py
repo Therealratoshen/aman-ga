@@ -129,11 +129,12 @@ class FraudService:
         }
     
     def calculate_risk_score(
-        self, 
-        user_id: str, 
+        self,
+        user_id: str,
         payment_data: dict,
         image_analysis: dict = None,
-        ocr_result: dict = None
+        ocr_result: dict = None,
+        authenticity_result: dict = None
     ) -> dict:
         """Calculate fraud risk score for a payment"""
 
@@ -151,17 +152,17 @@ class FraudService:
         if self.check_duplicate_proof(user_id, payment_data.get("transaction_id", "")):
             risk_score += 40
             risk_factors.append("Duplicate transaction ID")
-        
+
         # Check for duplicate image (if hash provided)
         if payment_data.get("proof_image_hash"):
             is_duplicate, existing_id = self.check_duplicate_image(
-                payment_data["proof_image_hash"], 
+                payment_data["proof_image_hash"],
                 user_id
             )
             if is_duplicate:
                 risk_score += 60
                 risk_factors.append(f"Duplicate image detected (matches payment {existing_id[:8]})")
-        
+
         # Check for duplicate transaction pattern
         if payment_data.get("amount") and payment_data.get("transaction_date") and payment_data.get("bank_name"):
             is_duplicate, existing_id = self.check_duplicate_transaction(
@@ -187,34 +188,45 @@ class FraudService:
         if payment_data.get("amount", 0) > 100000:
             risk_score += 15
             risk_factors.append("High amount transaction")
-        
+
         # Check image analysis results
         if image_analysis:
             if image_analysis.get("is_manipulated"):
                 risk_score += 70
                 risk_factors.append("Image manipulation detected")
-            
+
             if image_analysis.get("risk_level") == "HIGH":
                 risk_score += 30
                 risk_factors.append("High risk image indicators")
             elif image_analysis.get("risk_level") == "CRITICAL":
                 risk_score += 50
                 risk_factors.append("Critical risk image indicators")
-            
+
             if image_analysis.get("manipulation_indicators"):
                 for indicator in image_analysis["manipulation_indicators"]:
                     risk_factors.append(f"Image: {indicator}")
-        
+
         # Check OCR mismatches
         if ocr_result and ocr_result.get("mismatches"):
             mismatch_count = len(ocr_result["mismatches"])
             risk_score += min(50, mismatch_count * 25)  # 25 points per mismatch, max 50
             risk_factors.append(f"OCR detected {mismatch_count} mismatch(es) between form and image")
-        
+
         # Check OCR confidence
         if ocr_result and ocr_result.get("confidence_score", 1.0) < 0.3:
             risk_score += 15
             risk_factors.append("Low OCR confidence - image may be unclear or manipulated")
+
+        # Check authenticity results
+        if authenticity_result:
+            authenticity_score = authenticity_result.get("authenticity_score", 0.5)
+            is_likely_authentic = authenticity_result.get("is_likely_authentic", True)
+            
+            if not is_likely_authentic:
+                # Lower authenticity score increases risk
+                authenticity_risk = (1 - authenticity_score) * 80  # Max 80 points for low authenticity
+                risk_score += authenticity_risk
+                risk_factors.append(f"Receipt authenticity low (score: {authenticity_score:.2f})")
 
         # Determine risk level
         if risk_score >= 70:

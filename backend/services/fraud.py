@@ -134,7 +134,8 @@ class FraudService:
         payment_data: dict,
         image_analysis: dict = None,
         ocr_result: dict = None,
-        authenticity_result: dict = None
+        authenticity_result: dict = None,
+        validator_instance=None  # Pass validator instance for additional checks
     ) -> dict:
         """Calculate fraud risk score for a payment"""
 
@@ -221,12 +222,60 @@ class FraudService:
         if authenticity_result:
             authenticity_score = authenticity_result.get("authenticity_score", 0.5)
             is_likely_authentic = authenticity_result.get("is_likely_authentic", True)
-            
+
             if not is_likely_authentic:
                 # Lower authenticity score increases risk
                 authenticity_risk = (1 - authenticity_score) * 80  # Max 80 points for low authenticity
                 risk_score += authenticity_risk
                 risk_factors.append(f"Receipt authenticity low (score: {authenticity_score:.2f})")
+
+        # Additional validations using validator instance
+        if validator_instance:
+            # Check transaction frequency
+            try:
+                from database import supabase as db_client
+                freq_result = validator_instance.validate_transaction_frequency(
+                    user_id, 
+                    db_client, 
+                    period_hours=1, 
+                    max_transactions=5
+                )
+                
+                if not freq_result.is_within_limit:
+                    risk_score += 20
+                    risk_factors.append(f"High transaction frequency: {freq_result.transaction_count} transactions in last hour")
+            except:
+                # If frequency check fails, continue without penalty
+                pass
+
+            # Check for suspicious patterns
+            try:
+                pattern_result = validator_instance.validate_suspicious_patterns(
+                    ocr_result.get("extracted_text", "") if ocr_result else "",
+                    payment_data.get("amount", 0),
+                    payment_data.get("bank_name", "")
+                )
+                
+                if pattern_result.is_suspicious:
+                    risk_score += int(pattern_result.confidence_score * 50)  # Scale to 0-50 points
+                    risk_factors.append(f"Suspicious pattern detected: {', '.join(pattern_result.pattern_types)}")
+            except:
+                # If pattern check fails, continue without penalty
+                pass
+
+            # Check timing patterns
+            try:
+                timing_result = validator_instance.validate_timing_patterns(
+                    payment_data.get("transaction_date", ""),
+                    ocr_result.get("extracted_date", "") if ocr_result else ""
+                )
+                
+                if timing_result.is_suspicious:
+                    risk_score += int(timing_result.confidence_score * 40)  # Scale to 0-40 points
+                    risk_factors.append(f"Suspicious timing pattern: {', '.join(timing_result.timing_issues)}")
+            except:
+                # If timing check fails, continue without penalty
+                pass
 
         # Determine risk level
         if risk_score >= 70:

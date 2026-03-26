@@ -15,13 +15,22 @@ def test_validators():
     print("\n" + "="*60)
     print("Testing Validators Module")
     print("="*60)
-    
+
     try:
         from validators import PaymentValidator, PaymentProofCreate, ServiceType, PaymentMethod, BankName
-        
+        from virtual_accounts import get_va_manager
+
         validator = PaymentValidator()
         print("✅ PaymentValidator initialized")
-        
+
+        # Test Virtual Account Manager
+        print("\n📋 Test 0: Virtual Account Manager")
+        va_manager = get_va_manager()
+        vas = va_manager.get_all_virtual_accounts()
+        print(f"✅ Virtual Account Manager initialized with {len(vas)} VAs")
+        for va in vas:
+            print(f"   - {va.name}: {va.account_number}")
+
         # Test 1: Valid payment data
         print("\n📋 Test 1: Valid Payment Data")
         valid_data = {
@@ -32,7 +41,7 @@ def test_validators():
             "transaction_id": "TRX20240319ABC123",
             "transaction_date": "2024-03-19T10:00:00"
         }
-        
+
         is_valid, error, validated = validator.validate_payment_data(valid_data)
         if is_valid:
             print(f"✅ Valid data accepted")
@@ -40,7 +49,7 @@ def test_validators():
             print(f"   Transaction ID: {validated.transaction_id}")
         else:
             print(f"❌ Valid data rejected: {error}")
-        
+
         # Test 2: Invalid amount (too low)
         print("\n📋 Test 2: Invalid Amount (Too Low)")
         invalid_amount = {**valid_data, "amount": 50}
@@ -49,7 +58,7 @@ def test_validators():
             print(f"✅ Correctly rejected: {error}")
         else:
             print(f"❌ Should have been rejected")
-        
+
         # Test 3: Invalid amount (too high)
         print("\n📋 Test 3: Invalid Amount (Too High)")
         invalid_amount = {**valid_data, "amount": 200_000_000}
@@ -58,7 +67,7 @@ def test_validators():
             print(f"✅ Correctly rejected: {error}")
         else:
             print(f"❌ Should have been rejected")
-        
+
         # Test 4: Invalid transaction ID (suspicious pattern)
         print("\n📋 Test 4: Invalid Transaction ID (Suspicious)")
         invalid_tid = {**valid_data, "transaction_id": "TEST123"}
@@ -67,7 +76,7 @@ def test_validators():
             print(f"✅ Correctly rejected: {error}")
         else:
             print(f"❌ Should have been rejected")
-        
+
         # Test 5: Future date
         print("\n📋 Test 5: Future Date")
         from datetime import datetime, timedelta
@@ -78,18 +87,18 @@ def test_validators():
             print(f"✅ Correctly rejected: {error}")
         else:
             print(f"❌ Should have been rejected")
-        
+
         # Test 6: File validation (create test image)
         print("\n📋 Test 6: File Validation")
         from PIL import Image
         import io
-        
+
         # Create valid test image
         img = Image.new('RGB', (500, 500), color='white')
         img_bytes = io.BytesIO()
         img.save(img_bytes, format='JPEG')
         img_content = img_bytes.getvalue()
-        
+
         file_result = validator.validate_file(img_content, "test.jpg")
         if file_result.is_valid:
             print(f"✅ Valid image accepted")
@@ -98,7 +107,7 @@ def test_validators():
             print(f"   Hash: {file_result.image_hash[:16]}...")
         else:
             print(f"❌ Valid image rejected: {file_result.error_message}")
-        
+
         # Test 7: File too small
         print("\n📋 Test 7: File Too Small")
         tiny_file = b"x" * 100  # 100 bytes
@@ -107,14 +116,17 @@ def test_validators():
             print(f"✅ Correctly rejected: {file_result.error_message}")
         else:
             print(f"❌ Should have been rejected")
-        
-        # Test 8: OCR Test
-        print("\n📋 Test 8: OCR Extraction")
+
+        # Test 8: OCR Test with VA validation
+        print("\n📋 Test 8: OCR Extraction with VA Validation")
         ocr_result = validator.extract_ocr(img_content)
         print(f"✅ OCR processed")
         print(f"   Confidence: {ocr_result.confidence_score * 100:.1f}%")
         print(f"   Extracted Amount: {ocr_result.extracted_amount}")
-        
+        print(f"   VA Validation: {ocr_result.va_validation.is_valid_va}")
+        print(f"   VA Matched Accounts: {ocr_result.va_validation.matched_accounts}")
+        print(f"   VA First Level Status: {ocr_result.va_validation.first_level_status}")
+
         # Test 9: Image Analysis
         print("\n📋 Test 9: Image Analysis")
         analysis = validator.analyze_image(img_content)
@@ -122,9 +134,9 @@ def test_validators():
         print(f"   Manipulation Detected: {analysis.is_manipulated}")
         print(f"   Risk Level: {analysis.risk_level}")
         print(f"   Quality Score: {analysis.quality_score * 100:.1f}%")
-        
+
         return True
-        
+
     except Exception as e:
         print(f"❌ Error: {e}")
         import traceback

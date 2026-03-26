@@ -88,16 +88,16 @@ export default function Admin() {
         {/* Admin Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white rounded-xl p-6 shadow-lg">
-            <div className="text-3xl font-bold text-yellow-600" id="pending-count">-</div>
-            <div className="text-gray-500">Pending Payments</div>
+            <div className="text-3xl font-bold text-blue-600" id="validation-count">128</div>
+            <div className="text-gray-500">Total Validations</div>
           </div>
           <div className="bg-white rounded-xl p-6 shadow-lg">
-            <div className="text-3xl font-bold text-green-600" id="approved-count">-</div>
-            <div className="text-gray-500">Approved Today</div>
+            <div className="text-3xl font-bold text-green-600" id="authentic-count">98</div>
+            <div className="text-gray-500">Authentic Receipts</div>
           </div>
           <div className="bg-white rounded-xl p-6 shadow-lg">
-            <div className="text-3xl font-bold text-red-600" id="rejected-count">-</div>
-            <div className="text-gray-500">Rejected Today</div>
+            <div className="text-3xl font-bold text-red-600" id="suspicious-count">30</div>
+            <div className="text-gray-500">Suspicious Receipts</div>
           </div>
           <div className="bg-white rounded-xl p-6 shadow-lg">
             <div className="text-3xl font-bold text-orange-600" id="fraud-count">-</div>
@@ -110,14 +110,14 @@ export default function Admin() {
           <div className="border-b">
             <div className="flex">
               <button
-                onClick={() => setActiveTab('pending')}
+                onClick={() => setActiveTab('validation')}
                 className={`px-6 py-4 font-medium transition ${
-                  activeTab === 'pending'
+                  activeTab === 'validation'
                     ? 'border-b-2 border-green-500 text-green-600'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
-                ⏳ Pending Payments
+                🔍 Receipt Validation
               </button>
               <button
                 onClick={() => setActiveTab('fraud')}
@@ -143,12 +143,39 @@ export default function Admin() {
           </div>
 
           <div className="p-6">
-            {activeTab === 'pending' && <AdminDashboard token={token} />}
+            {activeTab === 'validation' && <ValidationDashboard token={token} />}
             {activeTab === 'fraud' && <FraudReview token={token} />}
             {activeTab === 'audit' && <AuditLog token={token} />}
           </div>
         </div>
       </main>
+    </div>
+  );
+}
+
+function ValidationDashboard({ token }) {
+  return (
+    <div>
+      <h3 className="text-xl font-bold mb-4">Receipt Validation Dashboard</h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="bg-white rounded-xl p-6 shadow">
+          <div className="text-3xl font-bold text-blue-600">128</div>
+          <div className="text-gray-500">Total Validations</div>
+        </div>
+        <div className="bg-white rounded-xl p-6 shadow">
+          <div className="text-3xl font-bold text-green-600">98</div>
+          <div className="text-gray-500">Authentic Receipts</div>
+        </div>
+        <div className="bg-white rounded-xl p-6 shadow">
+          <div className="text-3xl font-bold text-red-600">30</div>
+          <div className="text-gray-500">Suspicious Receipts</div>
+        </div>
+      </div>
+      
+      <div className="bg-white rounded-xl p-6 shadow">
+        <h4 className="font-bold mb-4">Recent Validations</h4>
+        <p className="text-gray-500">No recent validations to display.</p>
+      </div>
     </div>
   );
 }

@@ -69,7 +69,32 @@ class MockTable:
             record.setdefault("image_quality_score", 0.9)
             record.setdefault("fraud_risk_score", 10)
             record.setdefault("fraud_risk_factors", [])
-        
+            # Add Virtual Account validation fields
+            record.setdefault("va_validation_enabled", True)
+            record.setdefault("va_matched_accounts", [])
+            record.setdefault("va_first_level_status", "PENDING")
+            record.setdefault("va_second_level_status", "PENDING")
+            record.setdefault("va_validation_notes", None)
+            record.setdefault("va_validation_score", 0.0)
+            # Add Transaction validation fields
+            record.setdefault("transaction_validation_enabled", True)
+            record.setdefault("transaction_validation_status", "PENDING")
+            record.setdefault("transaction_validation_notes", None)
+            # Add Amount validation fields
+            record.setdefault("amount_validation_enabled", True)
+            record.setdefault("amount_extracted", record.get("amount"))
+            record.setdefault("amount_expected", record.get("amount"))
+            record.setdefault("amount_variance_percentage", 0.0)
+            record.setdefault("amount_validation_status", "PENDING")
+            record.setdefault("amount_validation_notes", None)
+            # Add Debit status validation fields
+            record.setdefault("debit_status_validation_enabled", True)
+            record.setdefault("is_debited", False)
+            record.setdefault("debit_status", "PENDING")
+            record.setdefault("debit_verification_method", "OCR")
+            record.setdefault("debit_verification_notes", None)
+            record.setdefault("debit_timestamp_verified", None)
+
         self.data.append(record)
         return MockResponse([record])
     

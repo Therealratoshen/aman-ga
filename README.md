@@ -50,45 +50,47 @@
 
 ## 🎯 What is Aman ga?
 
-**Aman ga?** is a **Proof of Concept (POC) payment verification system** designed for the Indonesian market to help users verify if online transactions are safe before transferring money.
+**Aman ga?** is a **Receipt Validation & Deepfake Detection System** designed for the Indonesian market to help users verify if payment receipts are authentic before trusting transactions.
 
-> **⚠️ DISCLAIMER:** This is a **demo/educational project**. No real payments are processed. All transactions are simulated. The system demonstrates OCR, image validation, and fraud detection concepts.
+> **⚠️ DISCLAIMER:** This is a **demo/educational project**. The system demonstrates OCR, image validation, deepfake detection, and authenticity assessment concepts.
 
 ### The Problem We Solve
 
-In Indonesia, online fraud is rampant. People need a way to:
-- ✅ Verify if a seller/service is legitimate (demo)
-- ✅ Check payment proofs before releasing services (simulated)
-- ✅ Get expert analysis on suspicious transactions (AI-powered POC)
-- ✅ Report and flag fraudulent activities (demo workflow)
+In Indonesia, online fraud is rampant with fake receipts and deepfakes. People need a way to:
+- ✅ Verify if payment receipts are authentic
+- ✅ Detect deepfakes and manipulated images
+- ✅ Get AI-powered authenticity assessments
+- ✅ Validate receipt details against extracted data
 
 ### How It Works
 
 ```mermaid
 graph LR
-    A[User Uploads Payment Proof] --> B{Validation}
+    A[User Uploads Receipt] --> B{Validation}
     B --> C[File Validation]
     B --> D[OCR Extraction]
     B --> E[Image Analysis]
-    C --> F[Fraud Scoring]
-    D --> F
-    E --> F
-    F --> G{Risk Level}
-    G -->|LOW| H[Auto-Approve]
-    G -->|MEDIUM| I[Manual Review]
-    G -->|HIGH| J[Flag & Suspend]
+    B --> F[Deepfake Detection]
+    C --> G[Authenticity Scoring]
+    D --> G
+    E --> G
+    F --> G
+    G --> H{Authenticity Level}
+    H -->|HIGH| I[Trust Receipt]
+    H -->|MEDIUM| J[Manual Review]
+    H -->|LOW| K[Flag as Suspicious]
 ```
 
 1. **User registers** (demo account)
-2. **Uploads payment proof** (screenshot - no real payment)
+2. **Uploads receipt/image** (screenshot or photo)
 3. **System validates**:
    - File validation (size, MIME, dimensions)
    - OCR extraction with confidence scoring
    - Image manipulation detection
-   - Duplicate detection
-4. **Fraud scoring** (0-200 points) determines risk level
-5. **Decision**: Auto-approve, Manual Review, or Flag
-6. **Service credit activated** (simulated) → User can test fraud checks
+   - Deepfake detection analysis
+   - Authenticity assessment
+4. **Authenticity scoring** determines trust level
+5. **Results**: Trust, Review, or Flag as suspicious
 
 ### 🌐 Live Demo
 
@@ -100,12 +102,13 @@ graph LR
 - **User**: Register a new account (demo)
 
 **What You Can Do:**
-- ✅ Upload fake payment proofs (for testing)
+- ✅ Upload receipts for validation
 - ✅ See OCR extraction in action
-- ✅ View validation results
-- ✅ Test admin approval workflow
+- ✅ View deepfake detection results
+- ✅ Get authenticity assessments
+- ✅ Test admin validation dashboard
 - ✅ Provide feedback to improve OCR
-- ✅ Explore all features (no real money involved)
+- ✅ Explore all features
 
 ---
 
@@ -117,20 +120,22 @@ graph LR
 - ✅ Secure password hashing (bcrypt)
 - ✅ Token expiration & refresh
 
-### 💳 Payment Processing (Simulated)
-> **⚠️ No real payments** - All transactions are simulated for testing
-- ✅ **Auto-Approval** for payments < Rp 1.000 (demo)
-- ✅ Manual admin review for larger amounts (workflow demo)
-- ✅ Image upload for payment proofs (OCR testing)
-- ✅ Multiple payment methods (Bank Transfer, E-Wallets - simulated)
-- ✅ Payment history tracking (demo data)
+### 📸 Receipt Validation & Deepfake Detection
+- ✅ **OCR extraction** with confidence scoring
+- ✅ **Deepfake detection** with multiple indicators
+- ✅ **Receipt format validation** (headers, items, totals, footers)
+- ✅ **Business information extraction** (names, addresses, tax IDs)
+- ✅ **Logical consistency validation** (amounts, taxes, calculations)
+- ✅ **Image manipulation analysis** (ELA, metadata, noise)
+- ✅ **Authenticity assessment** with scoring
+- ✅ **Real-time validation** results
 
-### 🛡️ Fraud Detection
-- ✅ Risk scoring algorithm (0-200 points)
-- ✅ Duplicate transaction detection (3 types)
-- ✅ Pattern analysis
-- ✅ Automatic user suspension for confirmed fraud (simulated)
-- ✅ Fraud flag review system
+### 🛡️ Advanced Security
+- ✅ Multi-layer validation (file, OCR, receipt structure, deepfake)
+- ✅ Duplicate detection with perceptual hashing
+- ✅ Rate limiting with IP blocking
+- ✅ Comprehensive audit logging
+- ✅ Security headers implementation
 
 ### 🧠 Self-Learning OCR ⭐ NEW v2.1
 - ✅ Receipt format database (13 Indonesian providers)
@@ -147,18 +152,18 @@ graph LR
 - ✅ Responsive design (mobile-friendly)
 
 ### 👮 Admin Dashboard
-- ✅ Pending payment review queue
-- ✅ Approve/Reject payments with notes
-- ✅ Flag users for fraud
-- ✅ Real-time statistics
+- ✅ Receipt validation statistics
+- ✅ Authenticity assessment tracking
+- ✅ Deepfake detection monitoring
+- ✅ Real-time validation metrics
 - ✅ Complete audit log
 
 ### 📱 User Interface
 - ✅ Responsive design (mobile-first)
 - ✅ Beautiful gradient UI (Tailwind CSS)
-- ✅ Real-time notifications
-- ✅ Service credit tracking
-- ✅ Payment history view
+- ✅ Real-time validation results
+- ✅ Receipt validation workflow
+- ✅ Deepfake detection reports
 
 ### 🔔 Notifications (Optional)
 - ✅ WhatsApp integration (Fonnte)
@@ -407,48 +412,42 @@ curl -X POST "http://localhost:8000/token" \
   -d "username=admin@amanga.id&password=admin123"
 ```
 
-### Payment
+### Receipt Validation
 
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| `POST` | `/payment/upload` | Upload payment proof | ✅ |
-| `GET` | `/payment/my` | Get payment history | ✅ |
-| `GET` | `/payment/credits` | Get service credits | ✅ |
+| `POST` | `/receipt/validate` | Validate receipt for authenticity and deepfake detection | ✅ |
+| `GET` | `/payment/credits` | Get service credits (simplified for mock mode) | ✅ |
 
-**Example: Upload Payment**
+**Example: Validate Receipt**
 ```bash
-curl -X POST "http://localhost:8000/payment/upload" \
+curl -X POST "http://localhost:8000/receipt/validate" \
   -H "Authorization: Bearer YOUR_TOKEN" \
-  -F "service_type=CEK_DASAR" \
-  -F "amount=1000" \
-  -F "payment_method=BANK_TRANSFER" \
   -F "bank_name=BCA" \
   -F "transaction_id=TRX123" \
   -F "transaction_date=2024-01-01T10:00:00" \
-  -F "proof_image=@screenshot.png"
+  -F "amount=100000" \
+  -F "proof_image=@receipt.png"
 ```
 
 ### Admin (Requires ADMIN or FINANCE role)
 
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| `GET` | `/admin/payments/pending` | Get pending payments | ✅ |
-| `POST` | `/admin/payment/{id}/approve` | Approve payment | ✅ |
-| `POST` | `/admin/payment/{id}/reject` | Reject payment | ✅ |
-| `POST` | `/admin/payment/{id}/flag` | Flag as fraud | ✅ |
 | `GET` | `/admin/stats` | Dashboard statistics | ✅ |
 
-**Example: Approve Payment**
+**Example: Get Stats**
 ```bash
-curl -X POST "http://localhost:8000/admin/payment/PAYMENT_ID/approve?notes=Verified" \
+curl -X GET "http://localhost:8000/admin/stats" \
   -H "Authorization: Bearer ADMIN_TOKEN"
 ```
 
-### Service
+### Feedback & Learning
 
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| `GET` | `/service/use/{type}` | Use service credit | ✅ |
+| `POST` | `/feedback/submit` | Submit OCR feedback for learning | ✅ |
+| `GET` | `/feedback/uncertainty-report/{payment_id}` | Get uncertainty report | ✅ |
 
 ### Health Check
 
@@ -462,19 +461,22 @@ curl -X POST "http://localhost:8000/admin/payment/PAYMENT_ID/approve?notes=Verif
 
 ## 💰 Service Pricing
 
+The system now focuses primarily on receipt validation and deepfake detection. Service credits are simplified when no database is present.
+
 | Service | Price | Auto-Approve | Processing Time | Description |
 |---------|-------|--------------|-----------------|-------------|
-| **🥉 Cek Dasar** | Rp 1.000 | ✅ Yes | Instant | Basic OJK/Kominfo check |
-| **🥈 Cek Deep** | Rp 15.000 | ❌ Manual | 5-30 min | AI chat analysis |
-| **🥇 Cek Plus** | Rp 45.000 | ❌ Manual | 5-30 min | Contract + legal letter |
+| **🔍 Receipt Validation** | Free (mock mode) | ✅ Yes | Instant | OCR validation & deepfake detection |
+| **🎭 Deepfake Detection** | Free (mock mode) | ✅ Yes | Instant | Advanced image analysis |
+| **✅ Authenticity Check** | Free (mock mode) | ✅ Yes | Instant | Receipt authenticity assessment |
 
-### Auto-Approval Rules
+### Validation Process
 
-Payments are auto-approved when ALL conditions are met:
-- ✅ Amount ≤ Rp 1.000
-- ✅ Service type = CEK_DASAR
-- ✅ No fraud history for user
-- ✅ Passes 10% random audit check
+Receipt validation includes:
+- ✅ OCR extraction with confidence scoring
+- ✅ Image manipulation detection
+- ✅ Deepfake analysis
+- ✅ Authenticity assessment
+- ✅ User feedback integration
 
 ---
 
@@ -497,29 +499,27 @@ npm run dev
 
 ### Test Scenarios
 
-#### Scenario 1: User Registration & Purchase
+#### Scenario 1: User Registration & Receipt Validation
 1. Register new account
 2. Login with new credentials
-3. Purchase "Cek Dasar" (Rp 1.000)
-4. Upload payment proof (any image)
-5. See instant auto-approval ✅
-6. Service credit activated in dashboard
+3. Navigate to Receipt Validation page
+4. Upload receipt image with transaction details
+5. See OCR extraction results ✅
+6. View deepfake detection analysis
+7. Check authenticity assessment
 
-#### Scenario 2: Admin Approval
+#### Scenario 2: Admin Dashboard
 1. Login as admin (`admin@amanga.id` / `admin123`)
 2. Navigate to Admin Panel
-3. See pending payment (if amount > Rp 1.000)
-4. Click "Approve" or "Reject"
-5. Add verification notes
-6. User receives notification
+3. View validation statistics
+4. Monitor authenticity assessments
+5. Review suspicious receipts
 
-#### Scenario 3: Fraud Detection
-1. Login as admin
-2. Flag suspicious payment
-3. Select flag type: FAKE_PROOF
-4. Select severity: HIGH
-5. User automatically suspended
-6. Service credits revoked
+#### Scenario 3: Deepfake Detection
+1. Upload a manipulated receipt image
+2. Observe deepfake detection indicators
+3. Check authenticity scoring
+4. Verify system flags suspicious receipts
 
 ### API Testing
 
@@ -617,6 +617,7 @@ Access your application:
 - ✅ Protected routes with middleware
 - ✅ Rate limiting (login, upload, API)
 - ✅ IP blocking after violations
+- ✅ **ENFORCED SECRET_KEY requirement** for production
 
 ### Data Protection
 - ✅ SQL injection prevention (Supabase client)
@@ -626,14 +627,12 @@ Access your application:
 - ✅ Security headers (HSTS, CSP, etc.)
 - ✅ File validation (MIME, size, dimensions)
 
-### Fraud Prevention
-- ✅ Risk scoring algorithm (0-200 points)
-- ✅ Duplicate transaction detection (3 types)
+### Receipt Validation Security
+- ✅ **Deepfake detection** with multiple indicators
 - ✅ Image manipulation detection (ELA, metadata, noise)
 - ✅ OCR verification with form matching
-- ✅ Automatic suspension for confirmed fraud
-- ✅ Audit logging for all admin actions
-- ✅ Perceptual hashing for image duplicates
+- ✅ Authenticity assessment with scoring
+- ✅ Perceptual hashing for duplicate detection
 
 ### Production Ready
 - ✅ HTTPS/SSL (Certbot)
@@ -806,14 +805,19 @@ This project was built to help Indonesians verify online transactions and avoid 
 
 | Milestone | Status | Date |
 |-----------|--------|------|
-| POC Development | ✅ Complete | Mar 2026 |
+| Receipt Validation Focus | ✅ Complete | Mar 2026 |
+| Deepfake Detection | ✅ Complete | Mar 2026 |
+| Receipt Format Validation | ✅ Complete | Mar 2026 |
+| Business Info Extraction | ✅ Complete | Mar 2026 |
+| Logical Consistency Checks | ✅ Complete | Mar 2026 |
+| Security Hardening | ✅ Complete | Mar 2026 |
 | Mock Mode | ✅ Complete | Mar 2026 |
 | Documentation | ✅ Complete | Mar 2026 |
 | Frontend UI | ✅ Complete | Mar 2026 |
 | Backend API | ✅ Complete | Mar 2026 |
 | Production Deployment | 🔄 Ready | - |
 
-**Last Updated:** March 15, 2026
+**Last Updated:** March 21, 2026
 
 ---
 

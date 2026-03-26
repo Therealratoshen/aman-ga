@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.amanga.backend</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/filberthenrico/aman-ga/backend/venv/bin/python</string>
+        <string>-c</string>
+        <string>
+import sys
+import os
+sys.path.insert(0, '/Users/filberthenrico/aman-ga/backend')
+os.chdir('/Users/filberthenrico/aman-ga/backend')
+from main import app
+import uvicorn
+uvicorn.run(app, host='0.0.0.0', port=8000, log_level='info')
+        </string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>/Users/filberthenrico/aman-ga/backend</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/tmp/aman-ga-backend.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/aman-ga-backend.log</string>
+</dict>
+</plist>

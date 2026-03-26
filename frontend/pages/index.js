@@ -122,6 +122,7 @@ export default function Home() {
             aman ga?
           </h1>
           <p className="text-gray-600 font-medium">Tanya dulu, transfer kemudian.</p>
+          <p className="text-sm text-gray-500 mt-2">Receipt Validation & Deepfake Detection</p>
         </div>
 
         {/* Error Message */}
@@ -279,9 +280,28 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Feature Highlights */}
+        <div className="mt-8 p-4 bg-green-50 rounded-xl border border-green-200">
+          <h3 className="font-bold text-green-800 mb-2">Features:</h3>
+          <ul className="text-sm text-green-700 space-y-1">
+            <li className="flex items-start">
+              <span className="mr-2">✓</span>
+              <span>Receipt OCR Validation</span>
+            </li>
+            <li className="flex items-start">
+              <span className="mr-2">✓</span>
+              <span>Deepfake Detection</span>
+            </li>
+            <li className="flex items-start">
+              <span className="mr-2">✓</span>
+              <span>Authenticity Assessment</span>
+            </li>
+          </ul>
+        </div>
+
         {/* Footer */}
         <div className="mt-6 text-center text-xs text-gray-500">
-          <p>© 2024 aman ga? • Secure Payment Verification</p>
+          <p>© 2024 aman ga? • Secure Receipt Validation</p>
         </div>
       </div>
 
